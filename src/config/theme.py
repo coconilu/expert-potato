@@ -5,27 +5,27 @@ from qfluentwidgets import setTheme, Theme, setThemeColor
 
 class ThemeConfig:
     """主题配置类"""
-    
+
     # 主题设置
     DEFAULT_THEME = Theme.DARK
-    DEFAULT_COLOR = '#009faa'
-    
+    DEFAULT_COLOR = "#009faa"
+
     # 字体设置
     DEFAULT_FONT_FAMILY = "Microsoft YaHei"
     TITLE_FONT_SIZE = 24
     CONTENT_FONT_SIZE = 14
-    
+
     # 窗口设置
     WINDOW_WIDTH = 1200
     WINDOW_HEIGHT = 800
     NAVIGATION_WIDTH = 200
-    
+
     @classmethod
     def apply_theme(cls):
         """应用主题设置"""
         setTheme(cls.DEFAULT_THEME)
         setThemeColor(cls.DEFAULT_COLOR)
-    
+
     @classmethod
     def get_title_style(cls):
         """获取标题样式"""
@@ -36,7 +36,7 @@ class ThemeConfig:
                 background-color: transparent;
             }
         """
-    
+
     @classmethod
     def get_content_style(cls):
         """获取内容样式"""
