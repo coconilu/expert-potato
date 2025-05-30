@@ -29,6 +29,7 @@ class MainWindow(QMainWindow):
     def setup_window(self):
         """设置窗口属性"""
         self.setWindowTitle(AppConstants.APP_TITLE)
+        self.setWindowIcon(ThemeConfig.APP_ICON)  # 设置窗口图标
         self.setGeometry(
             AppConstants.WINDOW_X,
             AppConstants.WINDOW_Y,

@@ -7,7 +7,7 @@ class AppConstants:
     """应用程序常量"""
 
     # 应用程序基本信息
-    APP_TITLE = "音视频处理工具"
+    APP_TITLE = "剪辑工具"
 
     # 窗口设置
     WINDOW_X = 100

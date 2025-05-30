@@ -1,6 +1,7 @@
 """主题配置模块"""
 
 from qfluentwidgets import setTheme, Theme, setThemeColor
+from PyQt6.QtGui import QIcon
 
 
 class ThemeConfig:
@@ -9,6 +10,9 @@ class ThemeConfig:
     # 主题设置
     DEFAULT_THEME = Theme.DARK
     DEFAULT_COLOR = "#009faa"
+
+    # 应用图标设置
+    APP_ICON = QIcon("src/assets/movie_icon.svg")  # 电影图标
 
     # 字体设置
     DEFAULT_FONT_FAMILY = "Microsoft YaHei"
