@@ -64,6 +64,33 @@ class AppConstants:
     LAYOUT_FIRST_ITEM = 0
 
 
+class TitleBarConstants:
+    """标题栏常量"""
+
+    # 标题栏尺寸
+    HEIGHT = 40
+    ICON_SIZE = 20
+    BUTTON_SIZE = 32
+
+    # 标题栏边距和间距
+    MARGIN_LEFT = 10
+    MARGIN_TOP = 0
+    MARGIN_RIGHT = 0
+    MARGIN_BOTTOM = 0
+    SPACING = 8
+
+    # 标题样式
+    TITLE_COLOR = "#ffffff"
+    TITLE_FONT_SIZE = 14
+    TITLE_FONT_WEIGHT = "bold"
+
+    # 按钮样式
+    BUTTON_COLOR = "#f0f0f0"
+    BUTTON_HOVER_COLOR = "rgba(255, 255, 255, 0.1)"
+    BUTTON_HOVER_TEXT_COLOR = "#ffffff"
+    CLOSE_BUTTON_HOVER_COLOR = "rgba(255, 0, 0, 0.8)"
+
+
 class Messages:
     """消息和文档字符串常量"""
 

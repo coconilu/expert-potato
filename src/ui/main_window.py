@@ -1,12 +1,20 @@
 """主窗口模块"""
 
 import sys
-from PyQt6.QtWidgets import QMainWindow, QHBoxLayout, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import (
+    QMainWindow,
+    QHBoxLayout,
+    QVBoxLayout,
+    QWidget,
+    QSizePolicy,
+)
+from PyQt6.QtCore import Qt
 from qfluentwidgets import FluentIcon, NavigationItemPosition
 
 from config.theme import ThemeConfig
 from config.core import AppConstants, Messages
 from ui.navigation import NavigationManager
+from ui.title_bar import CustomTitleBar
 from pages.extract_audio_page import ExtractAudioPage
 from pages.extract_text_page import ExtractTextPage
 
@@ -17,6 +25,8 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.current_page = None
+        self.drag_position = None
+        self.title_bar = None
         self.pages_cache = {}  # 页面缓存
 
         self.setup_window()
@@ -37,6 +47,9 @@ class MainWindow(QMainWindow):
             ThemeConfig.WINDOW_HEIGHT,
         )
 
+        # 隐藏默认标题栏，但保留窗口边框
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
+
         # 应用主题
         ThemeConfig.apply_theme()
 
@@ -46,8 +59,22 @@ class MainWindow(QMainWindow):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
 
+        # 创建主垂直布局
+        main_vertical_layout = QVBoxLayout(central_widget)
+        main_vertical_layout.setContentsMargins(0, 0, 0, 0)
+        main_vertical_layout.setSpacing(0)
+
+        # 创建自定义标题栏
+        self.title_bar = CustomTitleBar(self)
+        self.setup_title_bar_signals()
+        main_vertical_layout.addWidget(self.title_bar)
+
+        # 创建内容区域容器
+        content_container = QWidget()
+        main_vertical_layout.addWidget(content_container)
+
         # 创建主布局（水平布局）
-        self.main_layout = QHBoxLayout(central_widget)
+        self.main_layout = QHBoxLayout(content_container)
         self.main_layout.setContentsMargins(
             AppConstants.LAYOUT_MARGIN,
             AppConstants.LAYOUT_MARGIN,
@@ -125,6 +152,38 @@ class MainWindow(QMainWindow):
             child = self.content_layout.takeAt(AppConstants.LAYOUT_FIRST_ITEM)
             if child.widget():
                 child.widget().setParent(None)  # 不删除，只是移除父级关系
+
+    def setup_title_bar_signals(self):
+        """设置标题栏信号连接"""
+        self.title_bar.minimize_clicked.connect(self.showMinimized)
+        self.title_bar.maximize_clicked.connect(self.toggle_maximize)
+        self.title_bar.close_clicked.connect(self.close)
+        self.title_bar.title_bar_pressed.connect(self.on_title_bar_pressed)
+        self.title_bar.title_bar_moved.connect(self.on_title_bar_moved)
+
+    def toggle_maximize(self):
+        """切换最大化状态"""
+        if self.isMaximized():
+            self.showNormal()
+        else:
+            self.showMaximized()
+        self.title_bar.update_maximize_button(self.isMaximized())
+
+    def on_title_bar_pressed(self, event):
+        """标题栏鼠标按下事件"""
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.drag_position = (
+                event.globalPosition().toPoint() - self.frameGeometry().topLeft()
+            )
+            event.accept()
+
+    def on_title_bar_moved(self, event):
+        """标题栏鼠标移动事件"""
+        if event.buttons() == Qt.MouseButton.LeftButton and hasattr(
+            self, "drag_position"
+        ):
+            self.move(event.globalPosition().toPoint() - self.drag_position)
+            event.accept()
 
     def get_current_page(self):
         """获取当前页面"""
