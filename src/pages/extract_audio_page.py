@@ -1,6 +1,7 @@
 """提取音频页面模块"""
 
 from ui.base_page import BasePage
+from config.core import AppConstants, Messages
 
 
 class ExtractAudioPage(BasePage):
@@ -8,8 +9,8 @@ class ExtractAudioPage(BasePage):
 
     def __init__(self):
         super().__init__(
-            title="提取音频",
-            content="这里是提取音频功能的内容区域\n\n功能包括：\n• 从视频文件中提取音频\n• 支持多种音频格式输出\n• 批量处理功能",
+            title=AppConstants.PAGE_TITLE_EXTRACT_AUDIO,
+            content=AppConstants.PAGE_CONTENT_EXTRACT_AUDIO,
         )
 
     def setup_ui(self):

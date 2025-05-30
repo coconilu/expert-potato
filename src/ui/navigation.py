@@ -4,6 +4,7 @@ from typing import Callable, Dict, Any
 from PyQt6.QtCore import pyqtSignal, QObject
 from qfluentwidgets import NavigationInterface, NavigationItemPosition, FluentIcon
 from config.theme import ThemeConfig
+from config.core import AppConstants, Messages
 
 
 class NavigationManager(QObject):
@@ -29,10 +30,10 @@ class NavigationManager(QObject):
         """添加导航项"""
         # 存储页面信息
         self.pages[route_key] = {
-            "icon": icon,
-            "text": text,
-            "page_factory": page_factory,
-            "position": position,
+            AppConstants.DICT_KEY_ICON: icon,
+            AppConstants.DICT_KEY_TEXT: text,
+            AppConstants.DICT_KEY_PAGE_FACTORY: page_factory,
+            AppConstants.DICT_KEY_POSITION: position,
         }
 
         # 添加到导航栏

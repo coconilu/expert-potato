@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import QMainWindow, QHBoxLayout, QVBoxLayout, QWidget
 from qfluentwidgets import FluentIcon, NavigationItemPosition
 
 from config.theme import ThemeConfig
+from config.core import AppConstants, Messages
 from ui.navigation import NavigationManager
 from pages.extract_audio_page import ExtractAudioPage
 from pages.extract_text_page import ExtractTextPage
@@ -23,12 +24,17 @@ class MainWindow(QMainWindow):
         self.setup_navigation()
 
         # 显示默认页面
-        self.show_page("extract_audio")
+        self.show_page(AppConstants.DEFAULT_PAGE)
 
     def setup_window(self):
         """设置窗口属性"""
-        self.setWindowTitle("音视频处理工具")
-        self.setGeometry(100, 100, ThemeConfig.WINDOW_WIDTH, ThemeConfig.WINDOW_HEIGHT)
+        self.setWindowTitle(AppConstants.APP_TITLE)
+        self.setGeometry(
+            AppConstants.WINDOW_X,
+            AppConstants.WINDOW_Y,
+            ThemeConfig.WINDOW_WIDTH,
+            ThemeConfig.WINDOW_HEIGHT,
+        )
 
         # 应用主题
         ThemeConfig.apply_theme()
@@ -41,8 +47,13 @@ class MainWindow(QMainWindow):
 
         # 创建主布局（水平布局）
         self.main_layout = QHBoxLayout(central_widget)
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.main_layout.setSpacing(0)
+        self.main_layout.setContentsMargins(
+            AppConstants.LAYOUT_MARGIN,
+            AppConstants.LAYOUT_MARGIN,
+            AppConstants.LAYOUT_MARGIN,
+            AppConstants.LAYOUT_MARGIN,
+        )
+        self.main_layout.setSpacing(AppConstants.LAYOUT_SPACING)
 
         # 创建导航管理器
         self.navigation_manager = NavigationManager(self)
@@ -50,11 +61,18 @@ class MainWindow(QMainWindow):
         # 创建右侧内容区域
         self.content_widget = QWidget()
         self.content_layout = QVBoxLayout(self.content_widget)
-        self.content_layout.setContentsMargins(0, 0, 0, 0)
+        self.content_layout.setContentsMargins(
+            AppConstants.LAYOUT_MARGIN,
+            AppConstants.LAYOUT_MARGIN,
+            AppConstants.LAYOUT_MARGIN,
+            AppConstants.LAYOUT_MARGIN,
+        )
 
         # 添加到主布局
         self.main_layout.addWidget(self.navigation_manager.get_navigation_widget())
-        self.main_layout.addWidget(self.content_widget, 1)
+        self.main_layout.addWidget(
+            self.content_widget, AppConstants.CONTENT_STRETCH_FACTOR
+        )
 
     def setup_navigation(self):
         """设置导航"""
@@ -63,23 +81,23 @@ class MainWindow(QMainWindow):
 
         # 添加导航项
         self.navigation_manager.add_navigation_item(
-            route_key="extract_audio",
+            route_key=AppConstants.ROUTE_EXTRACT_AUDIO,
             icon=FluentIcon.MUSIC,
-            text="提取音频",
+            text=AppConstants.NAV_TEXT_EXTRACT_AUDIO,
             page_factory=ExtractAudioPage,
             position=NavigationItemPosition.TOP,
         )
 
         self.navigation_manager.add_navigation_item(
-            route_key="extract_text",
+            route_key=AppConstants.ROUTE_EXTRACT_TEXT,
             icon=FluentIcon.DOCUMENT,
-            text="提取文案",
+            text=AppConstants.NAV_TEXT_EXTRACT_TEXT,
             page_factory=ExtractTextPage,
             position=NavigationItemPosition.TOP,
         )
 
         # 设置默认选中项
-        self.navigation_manager.set_current_item("extract_audio")
+        self.navigation_manager.set_current_item(AppConstants.ROUTE_EXTRACT_AUDIO)
 
     def show_page(self, route_key: str):
         """显示指定页面"""
@@ -89,8 +107,10 @@ class MainWindow(QMainWindow):
         # 从缓存获取或创建新页面
         if route_key not in self.pages_cache:
             page_info = self.navigation_manager.get_page_info(route_key)
-            if page_info and "page_factory" in page_info:
-                self.pages_cache[route_key] = page_info["page_factory"]()
+            if page_info and AppConstants.DICT_KEY_PAGE_FACTORY in page_info:
+                self.pages_cache[route_key] = page_info[
+                    AppConstants.DICT_KEY_PAGE_FACTORY
+                ]()
 
         # 显示页面
         if route_key in self.pages_cache:
@@ -101,7 +121,7 @@ class MainWindow(QMainWindow):
     def clear_content(self):
         """清空内容区域"""
         while self.content_layout.count():
-            child = self.content_layout.takeAt(0)
+            child = self.content_layout.takeAt(AppConstants.LAYOUT_FIRST_ITEM)
             if child.widget():
                 child.widget().setParent(None)  # 不删除，只是移除父级关系
 

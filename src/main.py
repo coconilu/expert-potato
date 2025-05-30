@@ -3,6 +3,7 @@
 import sys
 from PyQt6.QtWidgets import QApplication
 from ui.main_window import MainWindow
+from config.core import Messages
 
 
 def main():
@@ -18,5 +19,5 @@ def main():
     sys.exit(app.exec())
 
 
-if __name__ == "__main__":
+if __name__ == Messages.CONDITION_MAIN_MODULE:
     main()

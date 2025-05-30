@@ -1,6 +1,7 @@
 """提取文案页面模块"""
 
 from ui.base_page import BasePage
+from config.core import AppConstants, Messages
 
 
 class ExtractTextPage(BasePage):
@@ -8,8 +9,8 @@ class ExtractTextPage(BasePage):
 
     def __init__(self):
         super().__init__(
-            title="提取文案",
-            content="这里是提取文案功能的内容区域\n\n功能包括：\n• 从音频文件中提取文字\n• 语音识别转文本\n• 支持多种语言识别\n• 字幕生成功能",
+            title=AppConstants.PAGE_TITLE_EXTRACT_TEXT,
+            content=AppConstants.PAGE_CONTENT_EXTRACT_TEXT,
         )
 
     def setup_ui(self):

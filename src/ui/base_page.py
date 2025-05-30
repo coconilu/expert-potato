@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 from config.theme import ThemeConfig
+from config.core import AppConstants, Messages
 
 
 class BasePage(QWidget):
@@ -32,7 +33,10 @@ class BasePage(QWidget):
         title_label.setStyleSheet(ThemeConfig.get_title_style())
 
         # 创建内容标签
-        content_label = QLabel(self.content or f"这里是{self.title}功能的内容区域")
+        content_label = QLabel(
+            self.content
+            or AppConstants.DEFAULT_CONTENT_TEMPLATE.format(title=self.title)
+        )
         content_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         content_label.setFont(
             QFont(ThemeConfig.DEFAULT_FONT_FAMILY, ThemeConfig.CONTENT_FONT_SIZE)
