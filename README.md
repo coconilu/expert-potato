@@ -19,6 +19,43 @@
 
 ## 安装依赖
 
+### 1. 安装 FFmpeg
+
+在安装 Python 依赖之前，需要先安装 FFmpeg（Whisper 音频处理必需）：
+
+**Windows:**
+
+```bash
+# 使用 Chocolatey
+choco install ffmpeg
+
+# 或使用 Scoop
+scoop install ffmpeg
+
+# 或手动下载安装
+# 从 https://ffmpeg.org/download.html 下载并添加到 PATH
+```
+
+**macOS:**
+
+```bash
+# 使用 Homebrew
+brew install ffmpeg
+```
+
+**Linux:**
+
+```bash
+# Ubuntu/Debian
+sudo apt update
+sudo apt install ffmpeg
+
+# CentOS/RHEL
+sudo yum install ffmpeg
+```
+
+### 2. 安装 Python 依赖
+
 使用 uv 包管理器安装依赖：
 
 ```bash
