@@ -45,32 +45,48 @@ class AudioExtractWorker(QThread):
     def is_cuda_available(self):
         """检查 CUDA 是否可用"""
         import whisper
-        import torch
 
-        print("看 PyTorch 版本", torch.__version__)
-        print(
-            "如果返回 None 或空，说明是 CPU-only 版本",
-            torch.version.cuda,
-            whisper.torch.cuda.is_available(),
-        )
         return whisper.torch.cuda.is_available()
+
+    def ensure_model_downloaded(self, model_name="base"):
+        try:
+            import whisper
+
+            model = whisper.load_model(
+                model_name, device="cuda" if self.is_cuda_available() else "cpu"
+            )
+            return model
+        except Exception as e:
+            print(f"模型加载失败: {e}")
+            # 可以尝试重新下载或使用其他模型
+            return None
 
     def run(self):
         """执行音频转文字任务"""
         try:
-            import whisper
 
             # 更新进度
             self.progress_updated.emit(20)
 
             # 加载模型
-            model = whisper.load_model(
-                "base", device="cuda" if self.is_cuda_available() else "cpu"
-            )
+            model = self.ensure_model_downloaded()
+            if not model:
+                raise Exception("模型加载失败")
+            # 更新进度
             self.progress_updated.emit(50)
 
+            # 检查音频文件是否存在
+            if not os.path.exists(self.audio_file_path):
+                raise FileNotFoundError(f"音频文件不存在：{self.audio_file_path}")
+
+            print("开始转录文件:", self.audio_file_path)
+
             # 转录音频
-            result = model.transcribe(self.audio_file_path)
+            try:
+                result = model.transcribe(self.audio_file_path)
+            except Exception as e:
+                print(f"音频转写失败: {str(e)}")
+                raise Exception(f"音频转写失败: {str(e)}")
             self.progress_updated.emit(90)
 
             # 提取文本
@@ -83,7 +99,7 @@ class AudioExtractWorker(QThread):
         except ImportError:
             self.error_occurred.emit("请先安装 whisper 库：pip install openai-whisper")
         except Exception as e:
-            print(e)
+            print("Exception", e)
             self.error_occurred.emit(f"音频转文字失败：{str(e)}")
 
 
