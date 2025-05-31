@@ -1,98 +1,95 @@
-# 多功能工具箱
+# 剪辑工具
 
-这是一个基于 PyQt6 和 PyQt6-Fluent-Widgets 构建的现代化桌面应用程序，采用模块化设计，提供音视频处理功能。
+一个基于 PyQt6 和 PyQt6-Fluent-Widgets 构建的现代化剪辑工具应用。
 
 ## 功能特性
 
-### 提取音频
+### 提取音频页面
 
-- 从视频文件中提取音频
-- 支持多种音频格式输出
-- 批量处理功能
+- **文件选择**: 支持拖拽和点击选择音频文件
+- **音频转文字**: 使用 OpenAI Whisper 模型进行高精度语音识别
+- **支持格式**: MP3, WAV, M4A, FLAC, AAC, OGG, WMA
+- **实时进度**: 显示转换进度条
+- **文案复制**: 一键复制提取的文案到剪贴板
+- **现代 UI**: 基于 Fluent Design 的美观界面
 
-### 提取文案
+### 提取文案页面
 
-- 从音频文件中提取文字
-- 语音识别转文本
-- 支持多种语言识别
-- 字幕生成功能
+- 占位页面，待后续开发
+
+## 安装依赖
+
+使用 uv 包管理器安装依赖：
+
+```bash
+# 创建虚拟环境
+uv venv
+
+# 同步依赖
+uv sync
+```
+
+或者使用 pip：
+
+```bash
+pip install PyQt6 PyQt6-Fluent-Widgets openai-whisper torch torchaudio
+```
+
+## 运行应用
+
+```bash
+python src/main.py
+```
+
+## 使用说明
+
+### 提取音频文案
+
+1. 启动应用后，默认进入"提取音频"页面
+2. 将音频文件拖拽到指定区域，或点击区域选择文件
+3. 选择文件后，点击"提取文案"按钮
+4. 等待 Whisper 模型处理（首次使用会下载模型）
+5. 提取完成后，文案会显示在文本区域
+6. 点击"复制文案"按钮将结果复制到剪贴板
+
+## 技术栈
+
+- **UI 框架**: PyQt6
+- **UI 组件库**: PyQt6-Fluent-Widgets
+- **语音识别**: OpenAI Whisper
+- **深度学习**: PyTorch
+- **包管理**: uv
 
 ## 项目结构
 
 ```
 src/
-├── main.py                 # 应用程序入口文件
-├── config/                  # 配置模块
-│   ├── __init__.py
-│   └── theme.py            # 主题配置（颜色、字体、窗口大小等）
-├── ui/                     # UI组件模块
-│   ├── __init__.py
-│   ├── base_page.py        # 页面基类
-│   ├── navigation.py       # 导航栏组件
-│   └── main_window.py      # 主窗口
-└── pages/                  # 页面模块
-    ├── __init__.py
-    ├── extract_audio_page.py  # 提取音频页面
-    └── extract_text_page.py   # 提取文案页面
+├── assets/          # 资源文件
+├── config/          # 配置文件
+│   ├── core.py      # 核心常量配置
+│   └── theme.py     # 主题配置
+├── pages/           # 页面组件
+│   ├── extract_audio_page.py  # 提取音频页面
+│   └── extract_text_page.py   # 提取文案页面
+├── ui/              # UI组件
+│   ├── base_page.py     # 页面基类
+│   ├── main_window.py   # 主窗口
+│   ├── navigation.py    # 导航组件
+│   └── title_bar.py     # 标题栏
+└── main.py          # 应用入口
 ```
-
-### 模块说明
-
-- **config/theme.py**: 统一管理应用主题、颜色、字体等配置
-- **ui/base_page.py**: 提供页面基类，统一页面布局和样式
-- **ui/navigation.py**: 导航栏组件，管理页面切换逻辑
-- **ui/main_window.py**: 主窗口，负责整体布局和页面管理
-- **pages/**: 各功能页面的具体实现
-
-## 技术栈
-
-- **PyQt6**: 现代化的 Python GUI 框架
-- **PyQt6-Fluent-Widgets**: 提供 Fluent Design 风格的 UI 组件
-- **模块化架构**: 清晰的代码结构，便于维护和扩展
-
-## 安装说明
-
-1. 确保已安装 Python 3.11.12 或更高版本
-2. 安装 uv 包管理器：
-
-```bash
-pip install uv
-```
-
-3. 同步项目依赖：
-
-```bash
-uv sync
-```
-
-## 运行应用
-
-在项目根目录下运行：
-
-```bash
-uv run python src/main.py
-```
-
-## 开发指南
-
-### 添加新页面
-
-1. 在 `pages/` 目录下创建新的页面文件
-2. 继承 `BasePage` 类
-3. 在 `main_window.py` 中注册新页面
-4. 在导航栏中添加对应的导航项
-
-### 自定义主题
-
-修改 `config/theme.py` 文件中的配置项：
-
-- `DEFAULT_THEME`: 主题模式（亮色/暗色）
-- `DEFAULT_COLOR`: 主题色彩
-- `WINDOW_WIDTH/HEIGHT`: 窗口尺寸
-- 样式相关的方法
 
 ## 注意事项
 
-- 应用采用暗色主题，适合长时间使用
-- 页面切换使用缓存机制，提高性能
-- 所有 UI 组件都遵循 Fluent Design 设计规范
+- 首次使用 Whisper 时会自动下载模型文件（约 140MB）
+- 音频文件越大，处理时间越长
+- 建议使用清晰的音频文件以获得更好的识别效果
+- 支持中文、英文等多种语言的语音识别
+
+## 开发说明
+
+- 代码遵循 PEP 8 规范
+- 使用类型注解提高代码可读性
+- 常量统一在 `config/core.py` 中管理
+- UI 样式在 `config/theme.py` 中配置
+- 采用模块化设计，便于扩展新功能
