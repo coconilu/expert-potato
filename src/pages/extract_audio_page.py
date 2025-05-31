@@ -42,6 +42,19 @@ class AudioExtractWorker(QThread):
         super().__init__()
         self.audio_file_path = audio_file_path
 
+    def is_cuda_available(self):
+        """检查 CUDA 是否可用"""
+        import whisper
+        import torch
+
+        print("看 PyTorch 版本", torch.__version__)
+        print(
+            "如果返回 None 或空，说明是 CPU-only 版本",
+            torch.version.cuda,
+            whisper.torch.cuda.is_available(),
+        )
+        return whisper.torch.cuda.is_available()
+
     def run(self):
         """执行音频转文字任务"""
         try:
@@ -51,7 +64,9 @@ class AudioExtractWorker(QThread):
             self.progress_updated.emit(20)
 
             # 加载模型
-            model = whisper.load_model("base")
+            model = whisper.load_model(
+                "base", device="cuda" if self.is_cuda_available() else "cpu"
+            )
             self.progress_updated.emit(50)
 
             # 转录音频
@@ -68,6 +83,7 @@ class AudioExtractWorker(QThread):
         except ImportError:
             self.error_occurred.emit("请先安装 whisper 库：pip install openai-whisper")
         except Exception as e:
+            print(e)
             self.error_occurred.emit(f"音频转文字失败：{str(e)}")
 
 
