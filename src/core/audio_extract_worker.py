@@ -27,12 +27,16 @@ class AudioExtractWorker(QThread):
 
     def supportModel(self):
         """获取支持的模型列表"""
-        try:
-            from faster_whisper import available_models
-
-            return available_models()
-        except ImportError:
-            return []
+        return [
+            "tiny",
+            "base",
+            "small",
+            "large",
+            "large-v1",
+            "large-v2",
+            "large-v3",
+            "large-v3-turbo",
+        ]
 
     def ensure_model_downloaded(self, model_name="base"):
         try:
