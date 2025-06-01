@@ -104,6 +104,8 @@ class ExtractAudioPage(QWidget):
         self.result_text.setMinimumHeight(
             AppConstants.EXTRACT_AUDIO_RESULT_TEXT_MIN_HEIGHT
         )
+        self.result_text.setReadOnly(True)
+        self.result_text.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
         # 复制按钮
         self.copy_button = PushButton(AppConstants.EXTRACT_AUDIO_COPY_BUTTON_TEXT)
