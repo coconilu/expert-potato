@@ -70,12 +70,16 @@ class ExtractAudioPage(QWidget):
         model_layout = QHBoxLayout()
         model_label = BodyLabel("选择模型：")
         self.model_combo = ComboBox()
-        self.model_combo.setMinimumWidth(150)
+        self.model_combo.setMinimumWidth(
+            AppConstants.EXTRACT_AUDIO_MODEL_COMBO_MIN_WIDTH
+        )
         self.model_combo.currentTextChanged.connect(self.on_model_changed)
 
         # 模型状态标签
         self.model_status_label = CaptionLabel("")
-        self.model_status_label.setStyleSheet("color: #666666;")
+        self.model_status_label.setStyleSheet(
+            f"color: {AppConstants.EXTRACT_AUDIO_MODEL_STATUS_COLOR};"
+        )
 
         model_layout.addWidget(model_label)
         model_layout.addWidget(self.model_combo)
@@ -179,28 +183,43 @@ class ExtractAudioPage(QWidget):
             import os
 
             # 检查模型缓存目录
-            model_cache_dir = os.path.expanduser("~/.cache/huggingface/hub")
+            model_cache_dir = os.path.expanduser(AppConstants.AUDIO_EXTRACT_CACHE_DIR)
             model_exists = False
 
             if os.path.exists(model_cache_dir):
                 # 检查是否存在对应的模型文件夹
                 for item in os.listdir(model_cache_dir):
-                    if f"whisper-{model_name}" in item.lower():
+                    if (
+                        f"{AppConstants.AUDIO_EXTRACT_MODEL_PREFIX}{model_name}"
+                        in item.lower()
+                    ):
                         model_exists = True
                         break
 
             if model_exists:
-                self.model_status_label.setText("已缓存")
-                self.model_status_label.setStyleSheet("color: #28a745;")
+                self.model_status_label.setText(
+                    AppConstants.AUDIO_EXTRACT_STATUS_MODEL_CACHED
+                )
+                self.model_status_label.setStyleSheet(
+                    f"color: {AppConstants.AUDIO_EXTRACT_COLOR_MODEL_CACHED};"
+                )
             else:
-                self.model_status_label.setText("下载模型需要占用一些时间")
-                self.model_status_label.setStyleSheet("color: #ffc107;")
+                self.model_status_label.setText(
+                    AppConstants.AUDIO_EXTRACT_STATUS_MODEL_DOWNLOAD_NEEDED
+                )
+                self.model_status_label.setStyleSheet(
+                    f"color: {AppConstants.AUDIO_EXTRACT_COLOR_MODEL_DOWNLOAD};"
+                )
 
         except Exception as e:
-            print(f"检查模型状态失败: {e}")
+            print(f"{AppConstants.AUDIO_EXTRACT_ERROR_MODEL_STATUS_CHECK}: {e}")
             # 默认显示需要下载
-            self.model_status_label.setText("下载模型需要占用一些时间")
-            self.model_status_label.setStyleSheet("color: #ffc107;")
+            self.model_status_label.setText(
+                AppConstants.AUDIO_EXTRACT_STATUS_MODEL_DOWNLOAD_NEEDED
+            )
+            self.model_status_label.setStyleSheet(
+                f"color: {AppConstants.AUDIO_EXTRACT_COLOR_MODEL_DOWNLOAD};"
+            )
 
     def on_file_selected(self, file_path: str):
         """文件选择事件"""
@@ -231,7 +250,7 @@ class ExtractAudioPage(QWidget):
 
         # 显示进度条
         self.progress_bar.setVisible(True)
-        self.progress_bar.setValue(0)
+        self.progress_bar.setValue(AppConstants.EXTRACT_AUDIO_PROGRESS_INITIAL_VALUE)
         self.extract_button.setEnabled(False)
         self.result_text.clear()
 
