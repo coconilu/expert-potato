@@ -73,19 +73,13 @@ class ExtractAudioPage(QWidget):
         self.model_combo.setMinimumWidth(150)
         self.model_combo.currentTextChanged.connect(self.on_model_changed)
 
-        # 模型下载状态按钮
-        self.model_status_button = PushButton("已加载")
-        self.model_status_button.setEnabled(False)
-        self.model_status_button.clicked.connect(self.download_model)
-
-        # 下载进度标签
-        self.download_progress_label = CaptionLabel("")
-        self.download_progress_label.setVisible(False)
+        # 模型状态标签
+        self.model_status_label = CaptionLabel("")
+        self.model_status_label.setStyleSheet("color: #666666;")
 
         model_layout.addWidget(model_label)
         model_layout.addWidget(self.model_combo)
-        model_layout.addWidget(self.model_status_button)
-        model_layout.addWidget(self.download_progress_label)
+        model_layout.addWidget(self.model_status_label)
         model_layout.addStretch()
 
         # 初始化模型列表
@@ -162,8 +156,6 @@ class ExtractAudioPage(QWidget):
                 self.model_combo.setCurrentText("base")
                 self.selected_model = "base"
 
-            # 检查当前模型状态
-            self.check_model_status(self.selected_model)
         except Exception as e:
             print(f"初始化模型列表失败: {e}")
             # 添加默认模型作为备选
@@ -181,14 +173,10 @@ class ExtractAudioPage(QWidget):
 
     def check_model_status(self, model_name: str):
         """检查模型状态"""
-        # 这里简化处理，实际应该检查模型是否已下载
-        # 可以通过检查模型文件是否存在来判断
         try:
-            from faster_whisper import WhisperModel
             import os
 
-            # 尝试创建模型实例来检查是否已下载
-            # 这里使用一个简单的方法：检查模型缓存目录
+            # 检查模型缓存目录
             model_cache_dir = os.path.expanduser("~/.cache/huggingface/hub")
             model_exists = False
 
@@ -200,74 +188,17 @@ class ExtractAudioPage(QWidget):
                         break
 
             if model_exists:
-                self.model_status_button.setText("已加载")
-                self.model_status_button.setEnabled(False)
-                self.download_progress_label.setVisible(False)
+                self.model_status_label.setText("已缓存")
+                self.model_status_label.setStyleSheet("color: #28a745;")
             else:
-                self.model_status_button.setText("加载模型")
-                self.model_status_button.setEnabled(True)
-                self.download_progress_label.setVisible(False)
+                self.model_status_label.setText("下载模型需要占用一些时间")
+                self.model_status_label.setStyleSheet("color: #ffc107;")
 
         except Exception as e:
             print(f"检查模型状态失败: {e}")
             # 默认显示需要下载
-            self.model_status_button.setText("加载模型")
-            self.model_status_button.setEnabled(True)
-            self.download_progress_label.setVisible(False)
-
-    def download_model(self):
-        """下载模型"""
-        if not self.selected_model:
-            return
-
-        # 显示下载进度
-        self.model_status_button.setEnabled(False)
-        self.download_progress_label.setText("0%")
-        self.download_progress_label.setVisible(True)
-
-        # 这里应该启动一个下载线程
-        # 为了演示，我们模拟下载过程
-        self.simulate_download()
-
-        InfoBar.info(
-            title="开始下载",
-            content=f"正在下载模型 {self.selected_model}...",
-            orient=Qt.Orientation.Horizontal,
-            isClosable=True,
-            position=InfoBarPosition.TOP,
-            duration=3000,
-            parent=self,
-        )
-
-    def simulate_download(self):
-        """模拟下载过程（实际项目中应该使用真实的下载逻辑）"""
-        from PyQt6.QtCore import QTimer
-
-        self.download_timer = QTimer()
-        self.download_progress = 0
-
-        def update_progress():
-            self.download_progress += 10
-            self.download_progress_label.setText(f"{self.download_progress}%")
-
-            if self.download_progress >= 100:
-                self.download_timer.stop()
-                self.model_status_button.setText("已加载")
-                self.model_status_button.setEnabled(False)
-                self.download_progress_label.setVisible(False)
-
-                InfoBar.success(
-                    title="下载完成",
-                    content=f"模型 {self.selected_model} 下载完成！",
-                    orient=Qt.Orientation.Horizontal,
-                    isClosable=True,
-                    position=InfoBarPosition.TOP,
-                    duration=3000,
-                    parent=self,
-                )
-
-        self.download_timer.timeout.connect(update_progress)
-        self.download_timer.start(500)  # 每500ms更新一次
+            self.model_status_label.setText("下载模型需要占用一些时间")
+            self.model_status_label.setStyleSheet("color: #ffc107;")
 
     def on_file_selected(self, file_path: str):
         """文件选择事件"""
