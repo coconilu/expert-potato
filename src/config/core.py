@@ -140,3 +140,9 @@ class Messages:
 
     # 条件语句
     CONDITION_MAIN_MODULE = "__main__"
+
+    # 热更新相关
+    HOT_RELOAD_ENV_VAR = "ENABLE_HOT_RELOAD"
+    HOT_RELOAD_TRUE_VALUES = ("true", "1", "yes")
+    HOT_RELOAD_WATCH_PATTERN = "src/**/*.py"
+    HOT_RELOAD_MODULE_PATH = "src.main.run_app"

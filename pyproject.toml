@@ -9,7 +9,8 @@ dependencies = [
     "PyQt6-Fluent-Widgets>=1.4.0",
     "faster-whisper>=1.0.0",
     "torch>=2.6.0",
-    "torchaudio>=2.6.0"
+    "torchaudio>=2.6.0",
+    "hupper>=1.12.1"
 ]
 
 [[tool.uv.index]]
