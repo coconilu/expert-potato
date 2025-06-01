@@ -84,7 +84,7 @@ class AppConstants:
     EXTRACT_AUDIO_SUCCESS_TITLE = "文件选择成功"
     EXTRACT_AUDIO_SUCCESS_CONTENT_PREFIX = "已选择："
     EXTRACT_AUDIO_START_TITLE = "开始提取"
-    EXTRACT_AUDIO_START_CONTENT = "正在使用 Faster-Whisper 提取音频文案..."
+    EXTRACT_AUDIO_START_CONTENT = "正在使用 Faster-Whisper 【{model}】 提取音频文案..."
     EXTRACT_AUDIO_COMPLETE_TITLE = "提取完成"
     EXTRACT_AUDIO_COMPLETE_CONTENT = "音频文案提取成功！"
     EXTRACT_AUDIO_ERROR_TITLE = "提取失败"

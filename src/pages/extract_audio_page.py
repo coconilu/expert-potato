@@ -245,7 +245,9 @@ class ExtractAudioPage(QWidget):
 
         InfoBar.info(
             title=AppConstants.EXTRACT_AUDIO_START_TITLE,
-            content=AppConstants.EXTRACT_AUDIO_START_CONTENT,
+            content=AppConstants.EXTRACT_AUDIO_START_CONTENT.format(
+                model=self.selected_model
+            ),
             orient=Qt.Orientation.Horizontal,
             isClosable=True,
             position=InfoBarPosition.TOP,
