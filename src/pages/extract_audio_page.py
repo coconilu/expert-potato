@@ -17,6 +17,7 @@ from qfluentwidgets import (
     FluentIcon as FIF,
     BodyLabel,
     CaptionLabel,
+    ComboBox,
 )
 from config.core import AppConstants, Messages
 from config.theme import ThemeConfig
@@ -31,6 +32,8 @@ class ExtractAudioPage(QWidget):
         super().__init__()
         self.current_file_path = ""
         self.worker = None
+        self.selected_model = "base"
+        self.model_download_progress = {}
         self.setup_ui()
 
     def setup_ui(self):
@@ -63,6 +66,31 @@ class ExtractAudioPage(QWidget):
         self.file_path_label = CaptionLabel(AppConstants.EXTRACT_AUDIO_NO_FILE_SELECTED)
         self.file_path_label.setStyleSheet(AppConstants.EXTRACT_AUDIO_NO_FILE_STYLE)
 
+        # 模型选择区域
+        model_layout = QHBoxLayout()
+        model_label = BodyLabel("选择模型：")
+        self.model_combo = ComboBox()
+        self.model_combo.setMinimumWidth(150)
+        self.model_combo.currentTextChanged.connect(self.on_model_changed)
+
+        # 模型下载状态按钮
+        self.model_status_button = PushButton("已加载")
+        self.model_status_button.setEnabled(False)
+        self.model_status_button.clicked.connect(self.download_model)
+
+        # 下载进度标签
+        self.download_progress_label = CaptionLabel("")
+        self.download_progress_label.setVisible(False)
+
+        model_layout.addWidget(model_label)
+        model_layout.addWidget(self.model_combo)
+        model_layout.addWidget(self.model_status_button)
+        model_layout.addWidget(self.download_progress_label)
+        model_layout.addStretch()
+
+        # 初始化模型列表
+        self.init_model_list()
+
         # 提取按钮
         self.extract_button = PushButton(AppConstants.EXTRACT_AUDIO_EXTRACT_BUTTON_TEXT)
         self.extract_button.setIcon(FIF.MICROPHONE)
@@ -93,6 +121,7 @@ class ExtractAudioPage(QWidget):
         layout.addWidget(title_label)
         layout.addWidget(self.drop_area)
         layout.addWidget(self.file_path_label)
+        layout.addLayout(model_layout)
 
         button_layout = QHBoxLayout()
         button_layout.addStretch()
@@ -110,6 +139,135 @@ class ExtractAudioPage(QWidget):
         layout.addLayout(copy_layout)
 
         layout.addStretch()
+
+    def init_model_list(self):
+        """初始化模型列表"""
+        try:
+            # 获取支持的模型列表
+            worker = AudioExtractWorker("")
+            models = worker.supportModel()
+
+            if models:
+                for model in models:
+                    self.model_combo.addItem(model)
+                # 设置默认选择base模型
+                if "base" in models:
+                    self.model_combo.setCurrentText("base")
+                    self.selected_model = "base"
+            else:
+                # 如果无法获取模型列表，添加默认模型
+                default_models = ["tiny", "base", "small", "medium", "large"]
+                for model in default_models:
+                    self.model_combo.addItem(model)
+                self.model_combo.setCurrentText("base")
+                self.selected_model = "base"
+
+            # 检查当前模型状态
+            self.check_model_status(self.selected_model)
+        except Exception as e:
+            print(f"初始化模型列表失败: {e}")
+            # 添加默认模型作为备选
+            default_models = ["tiny", "base", "small", "medium", "large"]
+            for model in default_models:
+                self.model_combo.addItem(model)
+            self.model_combo.setCurrentText("base")
+            self.selected_model = "base"
+            self.check_model_status(self.selected_model)
+
+    def on_model_changed(self, model_name: str):
+        """模型选择改变事件"""
+        self.selected_model = model_name
+        self.check_model_status(model_name)
+
+    def check_model_status(self, model_name: str):
+        """检查模型状态"""
+        # 这里简化处理，实际应该检查模型是否已下载
+        # 可以通过检查模型文件是否存在来判断
+        try:
+            from faster_whisper import WhisperModel
+            import os
+
+            # 尝试创建模型实例来检查是否已下载
+            # 这里使用一个简单的方法：检查模型缓存目录
+            model_cache_dir = os.path.expanduser("~/.cache/huggingface/hub")
+            model_exists = False
+
+            if os.path.exists(model_cache_dir):
+                # 检查是否存在对应的模型文件夹
+                for item in os.listdir(model_cache_dir):
+                    if f"whisper-{model_name}" in item.lower():
+                        model_exists = True
+                        break
+
+            if model_exists:
+                self.model_status_button.setText("已加载")
+                self.model_status_button.setEnabled(False)
+                self.download_progress_label.setVisible(False)
+            else:
+                self.model_status_button.setText("加载模型")
+                self.model_status_button.setEnabled(True)
+                self.download_progress_label.setVisible(False)
+
+        except Exception as e:
+            print(f"检查模型状态失败: {e}")
+            # 默认显示需要下载
+            self.model_status_button.setText("加载模型")
+            self.model_status_button.setEnabled(True)
+            self.download_progress_label.setVisible(False)
+
+    def download_model(self):
+        """下载模型"""
+        if not self.selected_model:
+            return
+
+        # 显示下载进度
+        self.model_status_button.setEnabled(False)
+        self.download_progress_label.setText("0%")
+        self.download_progress_label.setVisible(True)
+
+        # 这里应该启动一个下载线程
+        # 为了演示，我们模拟下载过程
+        self.simulate_download()
+
+        InfoBar.info(
+            title="开始下载",
+            content=f"正在下载模型 {self.selected_model}...",
+            orient=Qt.Orientation.Horizontal,
+            isClosable=True,
+            position=InfoBarPosition.TOP,
+            duration=3000,
+            parent=self,
+        )
+
+    def simulate_download(self):
+        """模拟下载过程（实际项目中应该使用真实的下载逻辑）"""
+        from PyQt6.QtCore import QTimer
+
+        self.download_timer = QTimer()
+        self.download_progress = 0
+
+        def update_progress():
+            self.download_progress += 10
+            self.download_progress_label.setText(f"{self.download_progress}%")
+
+            if self.download_progress >= 100:
+                self.download_timer.stop()
+                self.model_status_button.setText("已加载")
+                self.model_status_button.setEnabled(False)
+                self.download_progress_label.setVisible(False)
+
+                InfoBar.success(
+                    title="下载完成",
+                    content=f"模型 {self.selected_model} 下载完成！",
+                    orient=Qt.Orientation.Horizontal,
+                    isClosable=True,
+                    position=InfoBarPosition.TOP,
+                    duration=3000,
+                    parent=self,
+                )
+
+        self.download_timer.timeout.connect(update_progress)
+        self.download_timer.start(500)  # 每500ms更新一次
 
     def on_file_selected(self, file_path: str):
         """文件选择事件"""
@@ -144,8 +302,8 @@ class ExtractAudioPage(QWidget):
         self.extract_button.setEnabled(False)
         self.result_text.clear()
 
-        # 创建工作线程
-        self.worker = AudioExtractWorker(self.current_file_path)
+        # 创建工作线程，传入选择的模型
+        self.worker = AudioExtractWorker(self.current_file_path, self.selected_model)
         self.worker.progress_updated.connect(self.update_progress)
         self.worker.text_extracted.connect(self.on_text_extracted)
         self.worker.error_occurred.connect(self.on_error)

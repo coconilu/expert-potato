@@ -11,9 +11,10 @@ class AudioExtractWorker(QThread):
     text_extracted = pyqtSignal(str)
     error_occurred = pyqtSignal(str)
 
-    def __init__(self, audio_file_path: str):
+    def __init__(self, audio_file_path: str, model_name: str = "base"):
         super().__init__()
         self.audio_file_path = audio_file_path
+        self.model_name = model_name
 
     def is_cuda_available(self):
         """检查 CUDA 是否可用"""
@@ -23,6 +24,15 @@ class AudioExtractWorker(QThread):
             return torch.cuda.is_available()
         except ImportError:
             return False
+
+    def supportModel(self):
+        """获取支持的模型列表"""
+        try:
+            from faster_whisper import available_models
+
+            return available_models()
+        except ImportError:
+            return []
 
     def ensure_model_downloaded(self, model_name="base"):
         try:
@@ -46,9 +56,9 @@ class AudioExtractWorker(QThread):
             self.progress_updated.emit(20)
 
             # 加载模型
-            model = self.ensure_model_downloaded()
+            model = self.ensure_model_downloaded(self.model_name)
             if not model:
-                raise Exception("模型加载失败")
+                raise Exception(f"模型 {self.model_name} 加载失败")
             # 更新进度
             self.progress_updated.emit(50)
 
