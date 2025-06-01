@@ -299,7 +299,9 @@ class ExtractAudioPage(QWidget):
         """复制文案到剪贴板"""
         text = self.result_text.toPlainText()
         if text:
-            clipboard = QClipboard()
+            from PyQt6.QtWidgets import QApplication
+
+            clipboard = QApplication.clipboard()
             clipboard.setText(text)
 
             InfoBar.success(
