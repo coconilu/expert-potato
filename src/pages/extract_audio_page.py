@@ -292,6 +292,9 @@ class ExtractAudioPage(QWidget):
             self.worker.deleteLater()
             self.worker = None
 
+        # 检查模型状态
+        self.check_model_status(self.selected_model)
+
     def copy_text(self):
         """复制文案到剪贴板"""
         text = self.result_text.toPlainText()
