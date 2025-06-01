@@ -15,8 +15,8 @@ from config.theme import ThemeConfig
 from config.core import AppConstants, Messages
 from ui.navigation import NavigationManager
 from ui.title_bar import CustomTitleBar
-from pages.extract_audio_page import ExtractAudioPage
-from pages.extract_text_page import ExtractTextPage
+from pages import ExtractAudioPage
+from pages import ExtractTextPage
 
 
 class MainWindow(QMainWindow):
