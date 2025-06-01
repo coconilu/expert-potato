@@ -19,44 +19,7 @@
 
 ## 安装依赖
 
-### 1. 安装 FFmpeg
-
-在安装 Python 依赖之前，需要先安装 FFmpeg（Whisper 音频处理必需）：
-
-**Windows:**
-
-```bash
-# 使用 Chocolatey
-choco install ffmpeg
-
-# 或使用 Scoop
-scoop install ffmpeg
-
-# 或手动下载安装
-# 从 https://ffmpeg.org/download.html 下载并添加到 PATH
-```
-
-**macOS:**
-
-```bash
-# 使用 Homebrew
-brew install ffmpeg
-```
-
-**Linux:**
-
-```bash
-# Ubuntu/Debian
-sudo apt update
-sudo apt install ffmpeg
-
-# CentOS/RHEL
-sudo yum install ffmpeg
-```
-
-### 2. 安装 Python 依赖
-
-使用 uv 包管理器安装依赖：
+使用 uv 安装项目依赖（本应用使用 faster-whisper，无需单独安装 FFmpeg）：
 
 ```bash
 # 创建虚拟环境
@@ -93,7 +56,7 @@ python src/main.py
 
 - **UI 框架**: PyQt6
 - **UI 组件库**: PyQt6-Fluent-Widgets
-- **语音识别**: OpenAI Whisper
+- **语音识别**: Faster-Whisper
 - **深度学习**: PyTorch
 - **包管理**: uv
 

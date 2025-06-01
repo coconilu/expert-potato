@@ -44,17 +44,21 @@ class AudioExtractWorker(QThread):
 
     def is_cuda_available(self):
         """检查 CUDA 是否可用"""
-        import whisper
+        try:
+            import torch
 
-        return whisper.torch.cuda.is_available()
+            return torch.cuda.is_available()
+        except ImportError:
+            return False
 
     def ensure_model_downloaded(self, model_name="base"):
         try:
-            import whisper
+            from faster_whisper import WhisperModel
 
-            model = whisper.load_model(
-                model_name, device="cuda" if self.is_cuda_available() else "cpu"
-            )
+            device = "cuda" if self.is_cuda_available() else "cpu"
+            compute_type = "float16" if device == "cuda" else "int8"
+
+            model = WhisperModel(model_name, device=device, compute_type=compute_type)
             return model
         except Exception as e:
             print(f"模型加载失败: {e}")
@@ -83,21 +87,26 @@ class AudioExtractWorker(QThread):
 
             # 转录音频
             try:
-                result = model.transcribe(self.audio_file_path)
+                segments, info = model.transcribe(self.audio_file_path)
+                # 将所有段落的文本合并
+                text_segments = []
+                for segment in segments:
+                    text_segments.append(segment.text)
+                text = "".join(text_segments)
             except Exception as e:
                 print(f"音频转写失败: {str(e)}")
                 raise Exception(f"音频转写失败: {str(e)}")
             self.progress_updated.emit(90)
 
-            # 提取文本
-            text = result["text"]
             self.progress_updated.emit(100)
 
             # 发送结果
             self.text_extracted.emit(text)
 
         except ImportError:
-            self.error_occurred.emit("请先安装 whisper 库：pip install openai-whisper")
+            self.error_occurred.emit(
+                "请先安装 faster-whisper 库：pip install faster-whisper"
+            )
         except Exception as e:
             print("Exception", e)
             self.error_occurred.emit(f"音频转文字失败：{str(e)}")
@@ -299,7 +308,7 @@ class ExtractAudioPage(QWidget):
 
         InfoBar.info(
             title="开始提取",
-            content="正在使用 Whisper 提取音频文案...",
+            content="正在使用 Faster-Whisper 提取音频文案...",
             orient=Qt.Orientation.Horizontal,
             isClosable=True,
             position=InfoBarPosition.TOP,
