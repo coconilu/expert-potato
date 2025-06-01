@@ -189,37 +189,22 @@ class ExtractAudioPage(QWidget):
             if os.path.exists(model_cache_dir):
                 # 检查是否存在对应的模型文件夹
                 for item in os.listdir(model_cache_dir):
-                    if (
-                        f"{AppConstants.AUDIO_EXTRACT_MODEL_PREFIX}{model_name}"
-                        in item.lower()
-                    ):
+                    if f"{AppConstants.AUDIO_EXTRACT_MODEL_PREFIX}{model_name}" in item.lower():
                         model_exists = True
                         break
 
             if model_exists:
-                self.model_status_label.setText(
-                    AppConstants.AUDIO_EXTRACT_STATUS_MODEL_CACHED
-                )
-                self.model_status_label.setStyleSheet(
-                    f"color: {AppConstants.AUDIO_EXTRACT_COLOR_MODEL_CACHED};"
-                )
+                self.model_status_label.setText(AppConstants.AUDIO_EXTRACT_STATUS_MODEL_CACHED)
+                self.model_status_label.setStyleSheet(f"color: {AppConstants.AUDIO_EXTRACT_COLOR_MODEL_CACHED};")
             else:
-                self.model_status_label.setText(
-                    AppConstants.AUDIO_EXTRACT_STATUS_MODEL_DOWNLOAD_NEEDED
-                )
-                self.model_status_label.setStyleSheet(
-                    f"color: {AppConstants.AUDIO_EXTRACT_COLOR_MODEL_DOWNLOAD};"
-                )
+                self.model_status_label.setText(AppConstants.AUDIO_EXTRACT_STATUS_MODEL_DOWNLOAD_NEEDED)
+                self.model_status_label.setStyleSheet(f"color: {AppConstants.AUDIO_EXTRACT_COLOR_MODEL_DOWNLOAD};")
 
         except Exception as e:
             print(f"{AppConstants.AUDIO_EXTRACT_ERROR_MODEL_STATUS_CHECK}: {e}")
             # 默认显示需要下载
-            self.model_status_label.setText(
-                AppConstants.AUDIO_EXTRACT_STATUS_MODEL_DOWNLOAD_NEEDED
-            )
-            self.model_status_label.setStyleSheet(
-                f"color: {AppConstants.AUDIO_EXTRACT_COLOR_MODEL_DOWNLOAD};"
-            )
+            self.model_status_label.setText(AppConstants.AUDIO_EXTRACT_STATUS_MODEL_DOWNLOAD_NEEDED)
+            self.model_status_label.setStyleSheet(f"color: {AppConstants.AUDIO_EXTRACT_COLOR_MODEL_DOWNLOAD};")
 
     def on_file_selected(self, file_path: str):
         """文件选择事件"""

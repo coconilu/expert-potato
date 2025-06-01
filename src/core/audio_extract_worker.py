@@ -39,22 +39,12 @@ class AudioExtractWorker(QThread):
             "large-v3-turbo",
         ]
 
-    def ensure_model_downloaded(
-        self, model_name=AppConstants.AUDIO_EXTRACT_DEFAULT_MODEL
-    ):
+    def ensure_model_downloaded(self, model_name=AppConstants.AUDIO_EXTRACT_DEFAULT_MODEL):
         try:
             from faster_whisper import WhisperModel
 
-            device = (
-                AppConstants.AUDIO_EXTRACT_DEVICE_CUDA
-                if self.is_cuda_available()
-                else AppConstants.AUDIO_EXTRACT_DEVICE_CPU
-            )
-            compute_type = (
-                AppConstants.AUDIO_EXTRACT_COMPUTE_TYPE_CUDA
-                if device == AppConstants.AUDIO_EXTRACT_DEVICE_CUDA
-                else AppConstants.AUDIO_EXTRACT_COMPUTE_TYPE_CPU
-            )
+            device = AppConstants.AUDIO_EXTRACT_DEVICE_CUDA if self.is_cuda_available() else AppConstants.AUDIO_EXTRACT_DEVICE_CPU
+            compute_type = AppConstants.AUDIO_EXTRACT_COMPUTE_TYPE_CUDA if device == AppConstants.AUDIO_EXTRACT_DEVICE_CUDA else AppConstants.AUDIO_EXTRACT_COMPUTE_TYPE_CPU
 
             model = WhisperModel(model_name, device=device, compute_type=compute_type)
             return model
@@ -73,25 +63,15 @@ class AudioExtractWorker(QThread):
             # 加载模型
             model = self.ensure_model_downloaded(self.model_name)
             if not model:
-                raise Exception(
-                    AppConstants.AUDIO_EXTRACT_ERROR_MODEL_NOT_FOUND.format(
-                        model_name=self.model_name
-                    )
-                )
+                raise Exception(AppConstants.AUDIO_EXTRACT_ERROR_MODEL_NOT_FOUND.format(model_name=self.model_name))
             # 更新进度
             self.progress_updated.emit(AppConstants.AUDIO_EXTRACT_PROGRESS_FILE_CHECKED)
 
             # 检查音频文件是否存在
             if not os.path.exists(self.audio_file_path):
-                raise FileNotFoundError(
-                    AppConstants.AUDIO_EXTRACT_ERROR_FILE_NOT_FOUND.format(
-                        file_path=self.audio_file_path
-                    )
-                )
+                raise FileNotFoundError(AppConstants.AUDIO_EXTRACT_ERROR_FILE_NOT_FOUND.format(file_path=self.audio_file_path))
 
-            print(
-                AppConstants.AUDIO_EXTRACT_LOG_START_TRANSCRIPTION, self.audio_file_path
-            )
+            print(AppConstants.AUDIO_EXTRACT_LOG_START_TRANSCRIPTION, self.audio_file_path)
 
             # 转录音频
             try:
@@ -100,20 +80,10 @@ class AudioExtractWorker(QThread):
                 text_segments = []
                 for segment in segments:
                     text_segments.append(segment.text)
-                text = AppConstants.AUDIO_EXTRACT_TEXT_JOIN_SEPARATOR.join(
-                    text_segments
-                )
+                text = AppConstants.AUDIO_EXTRACT_TEXT_JOIN_SEPARATOR.join(text_segments)
             except Exception as e:
-                print(
-                    AppConstants.AUDIO_EXTRACT_ERROR_TRANSCRIPTION_FAILED.format(
-                        error=str(e)
-                    )
-                )
-                raise Exception(
-                    AppConstants.AUDIO_EXTRACT_ERROR_TRANSCRIPTION_FAILED.format(
-                        error=str(e)
-                    )
-                )
+                print(AppConstants.AUDIO_EXTRACT_ERROR_TRANSCRIPTION_FAILED.format(error=str(e)))
+                raise Exception(AppConstants.AUDIO_EXTRACT_ERROR_TRANSCRIPTION_FAILED.format(error=str(e)))
             self.progress_updated.emit(
                 AppConstants.AUDIO_EXTRACT_PROGRESS_TRANSCRIPTION_DONE
             )
@@ -124,9 +94,9 @@ class AudioExtractWorker(QThread):
             self.text_extracted.emit(text)
 
         except ImportError:
-            self.error_occurred.emit(AppConstants.AUDIO_EXTRACT_ERROR_INSTALL_LIBRARY)
+            self.error_occurred.emit(
+                AppConstants.AUDIO_EXTRACT_ERROR_INSTALL_LIBRARY
+            )
         except Exception as e:
             print(AppConstants.AUDIO_EXTRACT_LOG_EXCEPTION, e)
-            self.error_occurred.emit(
-                AppConstants.AUDIO_EXTRACT_ERROR_GENERAL.format(error=str(e))
-            )
+            self.error_occurred.emit(AppConstants.AUDIO_EXTRACT_ERROR_GENERAL.format(error=str(e)))
