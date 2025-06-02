@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
 )
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtCore import Qt, pyqtSignal, QTimer
 from PyQt6.QtGui import QFont
 from qfluentwidgets import (
     PushButton,
@@ -19,6 +19,7 @@ from qfluentwidgets import (
     CardWidget,
 )
 from config.theme import ThemeConfig
+from config.core import AppConstants
 from core import TextRefineWorker, ConnectivityChecker
 
 
@@ -33,6 +34,9 @@ class RefineArea(CardWidget):
         self.refine_worker = None
         self.connectivity_checker = None
         self.original_text = ""
+        self.refine_start_time = 0
+        self.refine_timer = QTimer()
+        self.refine_timer.timeout.connect(self.update_timer_display)
         self.setup_ui()
 
     def setup_ui(self):
@@ -74,10 +78,15 @@ class RefineArea(CardWidget):
         self.refine_button.clicked.connect(self.start_refine_text)
         self.refine_button.setEnabled(False)
 
+        # 计时器标签
+        self.timer_label = BodyLabel(AppConstants.REFINE_TIMER_INITIAL_TEXT)
+        self.timer_label.setVisible(False)
+
         api_key_layout.addWidget(api_key_label)
         api_key_layout.addWidget(self.api_key_input)
         api_key_layout.addWidget(self.connectivity_button)
         api_key_layout.addWidget(self.refine_button)
+        api_key_layout.addWidget(self.timer_label)
         api_key_layout.addStretch()
         layout.addLayout(api_key_layout)
 
@@ -219,6 +228,9 @@ class RefineArea(CardWidget):
         self.refined_text.clear()
         self.copy_refined_button.setEnabled(False)
 
+        # 启动计时器
+        self.start_timer()
+
         # 直接开始文案修复
         self.start_text_refinement()
 
@@ -298,6 +310,8 @@ class RefineArea(CardWidget):
         """修复任务完成"""
         self.refine_progress_bar.setVisible(False)
         self.refine_button.setEnabled(True)
+        # 停止计时器但保持显示
+        self.stop_timer()
         if self.refine_worker:
             self.refine_worker.deleteLater()
             self.refine_worker = None
@@ -331,6 +345,31 @@ class RefineArea(CardWidget):
     def get_refined_text(self) -> str:
         """获取修复后的文案"""
         return self.refined_text.toPlainText()
+
+    def start_timer(self):
+        """启动计时器"""
+        import time
+
+        self.refine_start_time = time.time()
+        self.timer_label.setText(AppConstants.REFINE_TIMER_INITIAL_TEXT)
+        self.timer_label.setVisible(True)
+        self.refine_timer.start(AppConstants.REFINE_TIMER_INTERVAL_MS)
+
+    def stop_timer(self):
+        """停止计时器"""
+        self.refine_timer.stop()
+
+    def update_timer_display(self):
+        """更新计时器显示"""
+        import time
+
+        elapsed_time = int(time.time() - self.refine_start_time)
+        minutes = elapsed_time // 60
+        seconds = elapsed_time % 60
+        timer_text = AppConstants.REFINE_TIMER_TEXT_TEMPLATE.format(
+            minutes=minutes, seconds=seconds
+        )
+        self.timer_label.setText(timer_text)
 
     def clear_refined_text(self):
         """清空修复后的文案"""

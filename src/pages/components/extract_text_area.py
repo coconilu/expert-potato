@@ -287,6 +287,7 @@ class ExtractTextArea(CardWidget):
         """根据文本区域内容更新复制按钮状态"""
         text = self.result_text.toPlainText().strip()
         self.copy_button.setEnabled(bool(text))
+        self.text_extracted.emit(text)
 
     def get_extracted_text(self) -> str:
         """获取提取的文本"""
