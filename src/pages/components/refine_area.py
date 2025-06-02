@@ -20,7 +20,7 @@ from qfluentwidgets import (
 )
 from config.theme import ThemeConfig
 from config.core import AppConstants
-from core import TextRefineWorker, ConnectivityChecker
+from core import TextRefineWorker, ConnectivityChecker, ConfigManager
 
 
 class RefineArea(CardWidget):
@@ -37,7 +37,9 @@ class RefineArea(CardWidget):
         self.refine_start_time = 0
         self.refine_timer = QTimer()
         self.refine_timer.timeout.connect(self.update_timer_display)
+        self.config_manager = ConfigManager()
         self.setup_ui()
+        self.load_saved_api_key()
 
     def setup_ui(self):
         """设置UI"""
@@ -63,8 +65,9 @@ class RefineArea(CardWidget):
         self.api_key_input.setPlaceholderText("请输入DeepSeek API密钥")
         self.api_key_input.setEchoMode(LineEdit.EchoMode.Password)
         self.api_key_input.setMinimumWidth(300)
-        # 监听API密钥输入变化，动态更新修复按钮状态
+        # 监听API密钥输入变化，动态更新修复按钮状态和保存API密钥
         self.api_key_input.textChanged.connect(self.update_refine_button_state)
+        self.api_key_input.textChanged.connect(self.save_api_key)
 
         # 连通性检查按钮
         self.connectivity_button = PushButton("检查连通性")
@@ -375,3 +378,22 @@ class RefineArea(CardWidget):
         """清空修复后的文案"""
         self.refined_text.clear()
         self.copy_refined_button.setEnabled(False)
+
+    def save_api_key(self):
+        """保存API密钥到本地配置"""
+        api_key = self.api_key_input.text().strip()
+        if api_key:
+            success = self.config_manager.set_api_key(api_key)
+            if not success:
+                print("保存API密钥失败")
+        else:
+            # 如果API密钥为空，则清除保存的密钥
+            self.config_manager.clear_api_key()
+
+    def load_saved_api_key(self):
+        """加载保存的API密钥"""
+        saved_api_key = self.config_manager.get_api_key()
+        if saved_api_key:
+            self.api_key_input.setText(saved_api_key)
+            # 手动触发一次状态更新，因为setText不会触发textChanged信号
+            self.update_refine_button_state()
