@@ -68,27 +68,22 @@ class RefineArea(CardWidget):
         self.connectivity_button.clicked.connect(self.check_api_connectivity)
         self.connectivity_button.setEnabled(False)
 
-        api_key_layout.addWidget(api_key_label)
-        api_key_layout.addWidget(self.api_key_input)
-        api_key_layout.addWidget(self.connectivity_button)
-        api_key_layout.addStretch()
-        layout.addLayout(api_key_layout)
-
-        # 修复按钮和进度
-        refine_button_layout = QHBoxLayout()
+        # 修复按钮
         self.refine_button = PushButton("修复文案")
         self.refine_button.setIcon(FIF.EDIT)
         self.refine_button.clicked.connect(self.start_refine_text)
         self.refine_button.setEnabled(False)
 
+        api_key_layout.addWidget(api_key_label)
+        api_key_layout.addWidget(self.api_key_input)
+        api_key_layout.addWidget(self.connectivity_button)
+        api_key_layout.addWidget(self.refine_button)
+        api_key_layout.addStretch()
+        layout.addLayout(api_key_layout)
+
         # 修复进度条
         self.refine_progress_bar = ProgressBar()
         self.refine_progress_bar.setVisible(False)
-
-        refine_button_layout.addStretch()
-        refine_button_layout.addWidget(self.refine_button)
-        refine_button_layout.addStretch()
-        layout.addLayout(refine_button_layout)
         layout.addWidget(self.refine_progress_bar)
 
         # 修复后的文案
