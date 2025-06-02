@@ -59,25 +59,21 @@ class ExtractTextArea(CardWidget):
             f"color: {AppConstants.EXTRACT_AUDIO_MODEL_STATUS_COLOR};"
         )
 
+        # 提取按钮
+        self.extract_button = PushButton(AppConstants.EXTRACT_AUDIO_EXTRACT_BUTTON_TEXT)
+        self.extract_button.setIcon(FIF.MICROPHONE)
+        self.extract_button.clicked.connect(self.extract_text)
+        self.extract_button.setEnabled(False)
+
         model_layout.addWidget(model_label)
         model_layout.addWidget(self.model_combo)
         model_layout.addWidget(self.model_status_label)
+        model_layout.addWidget(self.extract_button)
         model_layout.addStretch()
         layout.addLayout(model_layout)
 
         # 初始化模型列表
         self.init_model_list()
-
-        # 提取按钮
-        extract_button_layout = QHBoxLayout()
-        self.extract_button = PushButton(AppConstants.EXTRACT_AUDIO_EXTRACT_BUTTON_TEXT)
-        self.extract_button.setIcon(FIF.MICROPHONE)
-        self.extract_button.clicked.connect(self.extract_text)
-        self.extract_button.setEnabled(False)
-        extract_button_layout.addStretch()
-        extract_button_layout.addWidget(self.extract_button)
-        extract_button_layout.addStretch()
-        layout.addLayout(extract_button_layout)
 
         # 进度条
         self.progress_bar = ProgressBar()
