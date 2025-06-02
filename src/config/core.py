@@ -140,6 +140,77 @@ class AppConstants:
     AUDIO_EXTRACT_COMPUTE_TYPE_CPU = "int8"
     AUDIO_EXTRACT_TEXT_JOIN_SEPARATOR = ""
 
+    # DeepSeek API 常量
+    DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
+    DEEPSEEK_DEFAULT_MODEL = "deepseek-chat"
+    DEEPSEEK_DEFAULT_TEMPERATURE = 0.3
+    DEEPSEEK_DEFAULT_MAX_TOKENS = 2000
+    DEEPSEEK_REQUEST_TIMEOUT = 200
+    DEEPSEEK_SUCCESS_STATUS_CODE = 200
+    DEEPSEEK_DEFAULT_DOMAIN = "通用"
+
+    # DeepSeek API 请求头常量
+    DEEPSEEK_HEADER_CONTENT_TYPE = "Content-Type"
+    DEEPSEEK_HEADER_AUTHORIZATION = "Authorization"
+    DEEPSEEK_CONTENT_TYPE_JSON = "application/json"
+    DEEPSEEK_AUTH_PREFIX = "Bearer "
+
+    # DeepSeek API 参数常量
+    DEEPSEEK_PARAM_MODEL = "model"
+    DEEPSEEK_PARAM_MESSAGES = "messages"
+    DEEPSEEK_PARAM_TEMPERATURE = "temperature"
+    DEEPSEEK_PARAM_MAX_TOKENS = "max_tokens"
+    DEEPSEEK_MESSAGE_ROLE = "role"
+    DEEPSEEK_MESSAGE_CONTENT = "content"
+    DEEPSEEK_ROLE_USER = "user"
+
+    # DeepSeek API 响应常量
+    DEEPSEEK_RESPONSE_CHOICES = "choices"
+    DEEPSEEK_RESPONSE_MESSAGE = "message"
+    DEEPSEEK_RESPONSE_CONTENT = "content"
+    DEEPSEEK_RESULT_DOMAIN = "domain"
+    DEEPSEEK_RESULT_REFINED_TEXT = "refined_text"
+
+    # DeepSeek 进度常量
+    DEEPSEEK_PROGRESS_START = 10
+    DEEPSEEK_PROGRESS_VALIDATING = 30
+    DEEPSEEK_PROGRESS_PROCESSING = 70
+    DEEPSEEK_PROGRESS_COMPLETE = 100
+
+    # DeepSeek 错误消息常量
+    DEEPSEEK_ERROR_EMPTY_TEXT = "输入文案不能为空"
+    DEEPSEEK_ERROR_EMPTY_API_KEY = "API密钥不能为空"
+    DEEPSEEK_ERROR_API_REQUEST = "API请求失败，状态码: {status_code}，错误信息: {error}"
+    DEEPSEEK_ERROR_TIMEOUT = "API请求超时，请检查网络连接"
+    DEEPSEEK_ERROR_CONNECTION = "网络连接失败，请检查网络设置"
+    DEEPSEEK_ERROR_GENERAL = "文案修复失败：{error}"
+
+    # DeepSeek 日志消息常量
+    DEEPSEEK_LOG_START_REFINING = "开始修复文案:"
+    DEEPSEEK_LOG_TEXT_TRUNCATE = "..."
+    DEEPSEEK_LOG_REFINING_SUCCESS = "文案修复完成"
+    DEEPSEEK_LOG_VALIDATION_ERROR = "验证错误:"
+    DEEPSEEK_LOG_EXCEPTION = "Exception:"
+
+    # DeepSeek 提示词模板
+    DEEPSEEK_PROMPT_TEMPLATE = """请分析以下文案的专业领域，并在该领域的上下文中修复文案中的错别字、语法错误和专业术语。
+
+文案内容：
+{text}
+
+请按照以下JSON格式返回结果：
+{{
+    "domain": "识别出的专业领域（如：科技、医疗、教育、金融等）",
+    "refined_text": "修复后的文案内容"
+}}
+
+修复要求：
+1. 保持原文的语义和风格
+2. 修正错别字和语法错误
+3. 统一专业术语的表达
+4. 确保术语在该领域内的准确性
+5. 保持文案的流畅性和可读性"""
+
 
 class TitleBarConstants:
     """标题栏常量"""

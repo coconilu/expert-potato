@@ -10,7 +10,8 @@ dependencies = [
     "faster-whisper>=1.0.0",
     "torch>=2.6.0",
     "torchaudio>=2.6.0",
-    "hupper>=1.12.1"
+    "hupper>=1.12.1",
+    "requests>=2.31.0"
 ]
 
 [[tool.uv.index]]

@@ -18,11 +18,12 @@ from qfluentwidgets import (
     BodyLabel,
     CaptionLabel,
     ComboBox,
+    LineEdit,
 )
 from config.core import AppConstants, Messages
 from config.theme import ThemeConfig
 from core import AudioExtractWorker
-from pages.components import FileDropArea
+from pages.components import FileDropArea, RefineArea
 
 
 class ExtractAudioPage(QWidget):
@@ -34,6 +35,7 @@ class ExtractAudioPage(QWidget):
         self.worker = None
         self.selected_model = "base"
         self.model_download_progress = {}
+
         self.setup_ui()
 
     def setup_ui(self):
@@ -108,8 +110,8 @@ class ExtractAudioPage(QWidget):
         self.result_text.setMinimumHeight(
             AppConstants.EXTRACT_AUDIO_RESULT_TEXT_MIN_HEIGHT
         )
-        self.result_text.setReadOnly(True)
-        self.result_text.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        # 监听文本变化事件，动态更新复制按钮状态
+        self.result_text.textChanged.connect(self.update_copy_button_state)
 
         # 复制按钮
         self.copy_button = PushButton(AppConstants.EXTRACT_AUDIO_COPY_BUTTON_TEXT)
@@ -137,6 +139,10 @@ class ExtractAudioPage(QWidget):
         copy_layout.addStretch()
         copy_layout.addWidget(self.copy_button)
         layout.addLayout(copy_layout)
+
+        # 文案修复区域
+        self.refine_area = RefineArea()
+        layout.addWidget(self.refine_area)
 
         layout.addStretch()
 
@@ -189,22 +195,37 @@ class ExtractAudioPage(QWidget):
             if os.path.exists(model_cache_dir):
                 # 检查是否存在对应的模型文件夹
                 for item in os.listdir(model_cache_dir):
-                    if f"{AppConstants.AUDIO_EXTRACT_MODEL_PREFIX}{model_name}" in item.lower():
+                    if (
+                        f"{AppConstants.AUDIO_EXTRACT_MODEL_PREFIX}{model_name}"
+                        in item.lower()
+                    ):
                         model_exists = True
                         break
 
             if model_exists:
-                self.model_status_label.setText(AppConstants.AUDIO_EXTRACT_STATUS_MODEL_CACHED)
-                self.model_status_label.setStyleSheet(f"color: {AppConstants.AUDIO_EXTRACT_COLOR_MODEL_CACHED};")
+                self.model_status_label.setText(
+                    AppConstants.AUDIO_EXTRACT_STATUS_MODEL_CACHED
+                )
+                self.model_status_label.setStyleSheet(
+                    f"color: {AppConstants.AUDIO_EXTRACT_COLOR_MODEL_CACHED};"
+                )
             else:
-                self.model_status_label.setText(AppConstants.AUDIO_EXTRACT_STATUS_MODEL_DOWNLOAD_NEEDED)
-                self.model_status_label.setStyleSheet(f"color: {AppConstants.AUDIO_EXTRACT_COLOR_MODEL_DOWNLOAD};")
+                self.model_status_label.setText(
+                    AppConstants.AUDIO_EXTRACT_STATUS_MODEL_DOWNLOAD_NEEDED
+                )
+                self.model_status_label.setStyleSheet(
+                    f"color: {AppConstants.AUDIO_EXTRACT_COLOR_MODEL_DOWNLOAD};"
+                )
 
         except Exception as e:
             print(f"{AppConstants.AUDIO_EXTRACT_ERROR_MODEL_STATUS_CHECK}: {e}")
             # 默认显示需要下载
-            self.model_status_label.setText(AppConstants.AUDIO_EXTRACT_STATUS_MODEL_DOWNLOAD_NEEDED)
-            self.model_status_label.setStyleSheet(f"color: {AppConstants.AUDIO_EXTRACT_COLOR_MODEL_DOWNLOAD};")
+            self.model_status_label.setText(
+                AppConstants.AUDIO_EXTRACT_STATUS_MODEL_DOWNLOAD_NEEDED
+            )
+            self.model_status_label.setStyleSheet(
+                f"color: {AppConstants.AUDIO_EXTRACT_COLOR_MODEL_DOWNLOAD};"
+            )
 
     def on_file_selected(self, file_path: str):
         """文件选择事件"""
@@ -264,9 +285,9 @@ class ExtractAudioPage(QWidget):
         self.progress_bar.setValue(value)
 
     def on_text_extracted(self, text: str):
-        """文案提取完成"""
+        """处理提取的文本"""
         self.result_text.setPlainText(text)
-        self.copy_button.setEnabled(True)
+        # 复制按钮和修复按钮状态由textChanged事件自动更新
 
         InfoBar.success(
             title=AppConstants.EXTRACT_AUDIO_COMPLETE_TITLE,
@@ -319,3 +340,11 @@ class ExtractAudioPage(QWidget):
                 duration=AppConstants.EXTRACT_AUDIO_COPY_DURATION,
                 parent=self,
             )
+
+    def update_copy_button_state(self):
+        """根据文本区域内容更新复制按钮状态"""
+        text = self.result_text.toPlainText().strip()
+        self.copy_button.setEnabled(bool(text))
+        # 更新修复区域的原始文案
+        if hasattr(self, "refine_area"):
+            self.refine_area.set_original_text(text)
