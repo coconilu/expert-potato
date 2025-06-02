@@ -31,6 +31,9 @@ MANIFEST
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
+# 但是保留项目的PyInstaller配置文件
+!Expert Potato.spec
+!expert_potato.spec
 
 # Installer logs
 pip-log.txt
