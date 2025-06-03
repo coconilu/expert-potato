@@ -5,6 +5,7 @@ from PyQt6.QtCore import pyqtSignal, QObject
 from qfluentwidgets import NavigationInterface, NavigationItemPosition, FluentIcon
 from config.theme import ThemeConfig
 from config.core import AppConstants, Messages
+from ui.settings_dialog import SettingsDialog
 
 
 class NavigationManager(QObject):
@@ -18,6 +19,8 @@ class NavigationManager(QObject):
         self.navigation = NavigationInterface(parent, showMenuButton=True)
         self.navigation.setExpandWidth(ThemeConfig.NAVIGATION_WIDTH)
         self.pages: Dict[str, Dict[str, Any]] = {}
+        self.parent_window = parent
+        self.setup_settings_button()
 
     def add_navigation_item(
         self,
@@ -60,3 +63,18 @@ class NavigationManager(QObject):
     def get_page_info(self, route_key: str) -> Dict[str, Any]:
         """获取页面信息"""
         return self.pages.get(route_key, {})
+
+    def setup_settings_button(self):
+        """设置配置按钮"""
+        self.navigation.addItem(
+            routeKey="settings",
+            icon=FluentIcon.SETTING,
+            text=AppConstants.NAV_TEXT_SETTINGS,
+            onClick=self.show_settings_dialog,
+            position=NavigationItemPosition.BOTTOM,
+        )
+
+    def show_settings_dialog(self):
+        """显示配置弹窗"""
+        dialog = SettingsDialog(self.parent_window)
+        dialog.exec()
