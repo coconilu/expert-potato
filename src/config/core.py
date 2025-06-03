@@ -145,6 +145,17 @@ class AppConstants:
     AUDIO_EXTRACT_COMPUTE_TYPE_CPU = "int8"
     AUDIO_EXTRACT_TEXT_JOIN_SEPARATOR = ""
 
+    # 运行时模型下载配置
+    AUDIO_EXTRACT_DOWNLOAD_TIMEOUT = 300  # 5分钟超时
+    AUDIO_EXTRACT_RETRY_COUNT = 3  # 重试次数
+    AUDIO_EXTRACT_DOWNLOAD_CHUNK_SIZE = 8192  # 下载块大小
+
+    # 模型下载提示信息
+    AUDIO_EXTRACT_MSG_DOWNLOADING = "正在下载模型，请稍候..."
+    AUDIO_EXTRACT_MSG_DOWNLOAD_COMPLETE = "模型下载完成"
+    AUDIO_EXTRACT_MSG_DOWNLOAD_FAILED = "模型下载失败，请检查网络连接"
+    AUDIO_EXTRACT_MSG_FIRST_RUN = "首次运行需要下载模型文件，这可能需要几分钟时间"
+
     # DeepSeek API 常量
     DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
     DEEPSEEK_DEFAULT_MODEL = "deepseek-chat"

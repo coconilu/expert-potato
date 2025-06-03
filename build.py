@@ -9,26 +9,28 @@ from pathlib import Path
 
 
 def build_app():
-    """构建应用程序（单文件版本）"""
-    print("🚀 开始构建 Expert Potato (单文件版本)...")
+    """构建应用程序（文件夹版本，推荐）"""
+    print("🚀 开始构建 Expert Potato (优化版本)...")
     print("📝 注意: 使用优化的spec文件来减小构建产物大小")
+    print("🎯 策略: 排除模型缓存，运行时自动下载")
 
     # 检查是否存在 src/main.py
     if not Path("src/main.py").exists():
         print("❌ 错误: 找不到 src/main.py 文件")
         return False
 
-    # 检查是否存在spec文件
-    if not Path("expert_potato.spec").exists():
-        print("❌ 错误: 找不到 expert_potato.spec 文件")
+    # 检查是否存在优化的spec文件
+    spec_file = "Expert Potato.spec"
+    if not Path(spec_file).exists():
+        print(f"❌ 错误: 找不到 {spec_file} 文件")
         return False
 
-    # 使用spec文件构建（优化版本，排除模型缓存）
+    # 使用优化的spec文件构建（排除模型缓存和大型模块）
     cmd = [
         "uv",
         "run",
         "pyinstaller",
-        "expert_potato.spec",
+        spec_file,
         "--clean",
         "--noconfirm",
     ]
@@ -39,14 +41,26 @@ def build_app():
         result = subprocess.run(cmd, check=True)
         print("✅ 构建成功！")
 
-        # 检查输出文件
-        exe_path = Path("dist/Expert Potato.exe")
-        if exe_path.exists():
-            file_size = exe_path.stat().st_size / (1024 * 1024)  # MB
-            print(f"📦 可执行文件位置: {exe_path}")
-            print(f"📏 文件大小: {file_size:.1f} MB")
+        # 检查输出文件夹
+        app_dir = Path("dist/Expert Potato")
+        if app_dir.exists():
+            print(f"📦 应用程序文件夹: {app_dir}")
+            exe_path = app_dir / "Expert Potato.exe"
+            if exe_path.exists():
+                file_size = exe_path.stat().st_size / (1024 * 1024)  # MB
+                print(f"🎯 主执行文件: {exe_path}")
+                print(f"📏 主文件大小: {file_size:.1f} MB")
+
+                # 计算整个文件夹大小
+                total_size = sum(
+                    f.stat().st_size for f in app_dir.rglob("*") if f.is_file()
+                ) / (1024 * 1024)
+                print(f"📊 总文件夹大小: {total_size:.1f} MB")
+                print(f"💡 提示: 首次运行时会自动下载模型文件")
+            else:
+                print("⚠️  警告: 未找到预期的主执行文件")
         else:
-            print("⚠️  警告: 未找到预期的可执行文件")
+            print("⚠️  警告: 未找到预期的应用程序文件夹")
 
         return True
     except subprocess.CalledProcessError as e:
