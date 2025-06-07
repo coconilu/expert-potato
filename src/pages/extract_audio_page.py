@@ -15,7 +15,11 @@ from qfluentwidgets import (
     BodyLabel,
 )
 from config.core import AppConstants
-from .components import FileDropArea, RefineArea, ExtractTextArea
+from config.theme import ThemeConfig
+from pages.components.file_drop_area import FileDropArea
+from pages.components.extract_text_area import ExtractTextArea
+from pages.components.refine_area import RefineArea
+from core import get_state_manager
 
 
 class ExtractAudioPage(QWidget):
@@ -23,7 +27,7 @@ class ExtractAudioPage(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.current_file_path = ""
+        self.state_manager = get_state_manager()
         self.setup_ui()
 
     def setup_ui(self):

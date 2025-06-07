@@ -20,7 +20,13 @@ from qfluentwidgets import (
 )
 from config.theme import ThemeConfig
 from config.core import AppConstants
-from core import TextRefineWorker, ConnectivityChecker, ConfigManager
+from core import (
+    TextRefineWorker,
+    ConnectivityChecker,
+    ConfigManager,
+    get_state_manager,
+    RefineState,
+)
 
 
 class RefineArea(CardWidget):
@@ -33,13 +39,63 @@ class RefineArea(CardWidget):
         super().__init__()
         self.refine_worker = None
         self.connectivity_checker = None
-        self.original_text = ""
         self.refine_start_time = 0
         self.refine_timer = QTimer()
         self.refine_timer.timeout.connect(self.update_timer_display)
         self.config_manager = ConfigManager()
+        self.state_manager = get_state_manager()
         self.setup_ui()
         self.load_saved_api_key()
+        self.connect_state_signals()
+
+        # 初始状态更新
+        self.update_ui_state()
+        self.sync_text_display()
+
+    def connect_state_signals(self):
+        """连接状态管理器的信号"""
+        self.state_manager.extract_text_changed.connect(self.on_extract_text_changed)
+        self.state_manager.refine_state_changed.connect(self.on_refine_state_changed)
+        self.state_manager.refine_text_changed.connect(self.on_refine_text_changed)
+
+    def on_extract_text_changed(self, text: str):
+        """响应提取文本变化"""
+        self.sync_text_display()
+        self.update_ui_state()
+
+    def on_refine_state_changed(self, state: RefineState):
+        """响应修复状态变化"""
+        self.update_ui_state()
+
+    def on_refine_text_changed(self, text: str):
+        """响应修复文本变化"""
+        self.sync_text_display()
+
+    def update_ui_state(self):
+        """更新UI状态"""
+        # 检查是否可以进行修复
+        can_refine = self.state_manager.can_refine()
+        refine_state = self.state_manager.state.refine.state
+
+        # 更新按钮状态
+        self.refine_button.setEnabled(
+            can_refine and refine_state != RefineState.PROCESSING
+        )
+
+        # 更新进度条显示
+        if refine_state == RefineState.PROCESSING:
+            self.refine_progress_bar.setVisible(True)
+            self.refine_progress_bar.setRange(0, 0)  # 无限进度条
+        else:
+            self.refine_progress_bar.setVisible(False)
+
+    def sync_text_display(self):
+        """同步状态管理器中的文本到UI显示"""
+        # 同步修复后文本
+        refined_text = self.state_manager.get_refined_text()
+        current_refined = self.refined_text.toPlainText()
+        if refined_text != current_refined:
+            self.refined_text.setPlainText(refined_text)
 
     def setup_ui(self):
         """设置UI"""
@@ -121,8 +177,8 @@ class RefineArea(CardWidget):
 
     def set_original_text(self, text: str):
         """设置原始文案"""
-        self.original_text = text
-        self.update_refine_button_state()
+        # 通过状态管理器设置提取的文本
+        self.state_manager.set_extracted_text(text)
 
     def check_api_connectivity(self):
         """检查DeepSeek API连通性"""
@@ -190,8 +246,9 @@ class RefineArea(CardWidget):
     def update_refine_button_state(self):
         """根据文本区域内容和API密钥更新修复按钮状态"""
         api_key = self.api_key_input.text().strip()
+        original_text = self.state_manager.get_extracted_text()
         # 只有当原始文案有内容且API密钥已填写时才启用修复按钮
-        self.refine_button.setEnabled(bool(self.original_text) and bool(api_key))
+        self.refine_button.setEnabled(bool(original_text) and bool(api_key))
         # 同时更新连通性检查按钮状态
         self.connectivity_button.setEnabled(bool(api_key))
 
@@ -211,7 +268,8 @@ class RefineArea(CardWidget):
             )
             return
 
-        if not self.original_text:
+        original_text = self.state_manager.get_extracted_text()
+        if not original_text:
             InfoBar.error(
                 title="错误",
                 content="请先提取文案",
@@ -242,10 +300,11 @@ class RefineArea(CardWidget):
         api_key = self.api_key_input.text().strip()
 
         # 构建文案修复的提示词
+        original_text = self.state_manager.get_extracted_text()
         refine_prompt = f"""请修复文案中的错别字、语法错误、专业术语和断句分段等问题。
 
 原始文案：
-{self.original_text}
+{original_text}
 
 请按照以下要求修复文案：
 1. 修正错别字和语法错误，但是不要变更原文（插入或删除）
@@ -284,8 +343,8 @@ class RefineArea(CardWidget):
 
     def on_text_refined(self, refined_text: str):
         """文案修复完成"""
-        self.refined_text.setPlainText(refined_text)
-        self.copy_refined_button.setEnabled(True)
+        # 通过状态管理器完成修复并设置文本
+        self.state_manager.complete_refine(refined_text)
 
         InfoBar.success(
             title="修复完成",
@@ -299,6 +358,9 @@ class RefineArea(CardWidget):
 
     def on_refine_error(self, error_message: str):
         """处理修复错误"""
+        # 通过状态管理器标记修复失败
+        self.state_manager.fail_refine(error_message)
+
         InfoBar.error(
             title="修复失败",
             content=error_message,
@@ -312,7 +374,6 @@ class RefineArea(CardWidget):
     def on_refine_finished(self):
         """修复任务完成"""
         self.refine_progress_bar.setVisible(False)
-        self.refine_button.setEnabled(True)
         # 停止计时器但保持显示
         self.stop_timer()
         if self.refine_worker:
@@ -328,7 +389,7 @@ class RefineArea(CardWidget):
 
     def copy_refined_text(self):
         """复制修复后的文案到剪贴板"""
-        text = self.refined_text.toPlainText()
+        text = self.state_manager.get_refined_text()
         if text:
             from PyQt6.QtWidgets import QApplication
 
@@ -347,7 +408,7 @@ class RefineArea(CardWidget):
 
     def get_refined_text(self) -> str:
         """获取修复后的文案"""
-        return self.refined_text.toPlainText()
+        return self.state_manager.get_refined_text()
 
     def start_timer(self):
         """启动计时器"""
@@ -376,8 +437,7 @@ class RefineArea(CardWidget):
 
     def clear_refined_text(self):
         """清空修复后的文案"""
-        self.refined_text.clear()
-        self.copy_refined_button.setEnabled(False)
+        self.state_manager.reset_refine()
 
     def save_api_key(self):
         """保存API密钥到本地配置"""
@@ -386,14 +446,20 @@ class RefineArea(CardWidget):
             success = self.config_manager.set_api_key(api_key)
             if not success:
                 print("保存API密钥失败")
+            # 同时更新状态管理器中的API密钥
+            self.state_manager.set_api_key(api_key)
         else:
             # 如果API密钥为空，则清除保存的密钥
             self.config_manager.clear_api_key()
+            # 同时清除状态管理器中的API密钥
+            self.state_manager.set_api_key("")
 
     def load_saved_api_key(self):
         """加载保存的API密钥"""
         saved_api_key = self.config_manager.get_api_key()
         if saved_api_key:
             self.api_key_input.setText(saved_api_key)
+            # 同时更新状态管理器中的API密钥
+            self.state_manager.set_api_key(saved_api_key)
             # 手动触发一次状态更新，因为setText不会触发textChanged信号
             self.update_refine_button_state()
