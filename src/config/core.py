@@ -26,7 +26,7 @@ class AppConstants:
     ROUTE_EXTRACT_TEXT = "extract_text"
 
     # 导航文本
-    NAV_TEXT_EXTRACT_AUDIO = "提取音频"
+    NAV_TEXT_EXTRACT_AUDIO = "音视频转文案"
     NAV_TEXT_EXTRACT_TEXT = "提取文案"
     NAV_TEXT_SETTINGS = "配置"
 
@@ -44,16 +44,17 @@ class AppConstants:
     SETTINGS_MODEL_DELETE_BUTTON = "删除"
 
     # 页面标题
-    PAGE_TITLE_EXTRACT_AUDIO = "提取音频"
+    PAGE_TITLE_EXTRACT_AUDIO = "音视频转文案"
     PAGE_TITLE_EXTRACT_TEXT = "提取文案"
 
     # 页面内容
     PAGE_CONTENT_EXTRACT_AUDIO = (
-        "这里是提取音频功能的内容区域\n\n"
+        "这里是音视频转文案功能的内容区域\n\n"
         "功能包括：\n"
-        "• 从视频文件中提取音频\n"
-        "• 支持多种音频格式输出\n"
-        "• 批量处理功能"
+        "• 支持音频文件直接转文案\n"
+        "• 支持视频文件提取音频后转文案\n"
+        "• 使用 Whisper 模型进行高精度识别\n"
+        "• 支持多种音视频格式"
     )
 
     PAGE_CONTENT_EXTRACT_TEXT = (
@@ -163,6 +164,22 @@ class AppConstants:
     AUDIO_EXTRACT_DOWNLOAD_TIMEOUT = 300  # 5分钟超时
     AUDIO_EXTRACT_RETRY_COUNT = 3  # 重试次数
     AUDIO_EXTRACT_DOWNLOAD_CHUNK_SIZE = 8192  # 下载块大小
+
+    # 视频音频提取常量
+    SUPPORTED_VIDEO_EXTENSIONS = [".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv", ".webm", ".m4v"]
+    SUPPORTED_AUDIO_EXTENSIONS = [".mp3", ".wav", ".m4a", ".flac", ".aac", ".ogg", ".wma"]
+    VIDEO_EXTRACT_TIMEOUT = 300  # 视频处理超时时间（秒）
+    VIDEO_EXTRACT_TEMP_DIR = "temp_audio"  # 临时音频文件目录
+    
+    # 视频处理提示信息
+    VIDEO_EXTRACT_MSG_PROCESSING = "正在从视频中提取音频..."
+    VIDEO_EXTRACT_MSG_COMPLETE = "音频提取完成"
+    VIDEO_EXTRACT_MSG_FAILED = "音频提取失败"
+    
+    # 文件选择提示更新
+    FILE_DROP_HINT_TEXT = "拖拽音频或视频文件到此处\n或点击选择文件"
+    FILE_DROP_DIALOG_TITLE = "选择音频或视频文件"
+    FILE_DROP_DIALOG_FILTER = "媒体文件 (*.mp3 *.wav *.m4a *.flac *.aac *.ogg *.wma *.mp4 *.avi *.mov *.mkv *.wmv *.flv *.webm *.m4v)"
 
     # 模型下载提示信息
     AUDIO_EXTRACT_MSG_DOWNLOADING = "正在下载模型，请稍候..."
