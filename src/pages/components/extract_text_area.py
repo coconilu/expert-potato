@@ -34,6 +34,7 @@ class ExtractTextArea(CardWidget):
         super().__init__()
         self.worker = None
         self.state_manager = get_state_manager()
+        self.selected_output_format = AppConstants.OUTPUT_FORMAT_DEFAULT
         self.setup_ui()
         self.connect_state_signals()
 
@@ -65,6 +66,20 @@ class ExtractTextArea(CardWidget):
             f"color: {AppConstants.EXTRACT_AUDIO_MODEL_STATUS_COLOR};"
         )
 
+        # 输出格式选择
+        output_format_label = BodyLabel(AppConstants.OUTPUT_FORMAT_LABEL_TEXT)
+        self.output_format_combo = ComboBox()
+        self.output_format_combo.setMinimumWidth(
+            AppConstants.OUTPUT_FORMAT_COMBO_MIN_WIDTH
+        )
+        self.output_format_combo.addItems([
+            AppConstants.OUTPUT_FORMAT_TXT,
+            AppConstants.OUTPUT_FORMAT_SRT,
+            AppConstants.OUTPUT_FORMAT_VTT
+        ])
+        self.output_format_combo.setCurrentText(AppConstants.OUTPUT_FORMAT_DEFAULT)
+        self.output_format_combo.currentTextChanged.connect(self.on_output_format_changed)
+
         # 提取按钮
         self.extract_button = PushButton(AppConstants.EXTRACT_AUDIO_EXTRACT_BUTTON_TEXT)
         self.extract_button.setIcon(FIF.MICROPHONE)
@@ -73,6 +88,8 @@ class ExtractTextArea(CardWidget):
         model_layout.addWidget(model_label)
         model_layout.addWidget(self.model_combo)
         model_layout.addWidget(self.model_status_label)
+        model_layout.addWidget(output_format_label)
+        model_layout.addWidget(self.output_format_combo)
         model_layout.addWidget(self.extract_button)
         model_layout.addStretch()
         layout.addLayout(model_layout)
@@ -206,6 +223,12 @@ class ExtractTextArea(CardWidget):
         self.state_manager.state.extract.selected_model = model_name
         self.check_model_status(model_name)
 
+    def on_output_format_changed(self, format_name: str):
+        """输出格式选择改变事件"""
+        # 这里可以将选择的格式保存到状态管理器中
+        # 暂时只是记录选择的格式，后续可以在提取时使用
+        self.selected_output_format = format_name
+
     def check_model_status(self, model_name: str):
         """检查模型状态"""
         try:
@@ -264,8 +287,8 @@ class ExtractTextArea(CardWidget):
         # 清空结果文本
         self.result_text.clear()
 
-        # 创建工作线程，传入选择的模型
-        self.worker = AudioExtractWorker(file_path, selected_model)
+        # 创建工作线程，传入选择的模型和输出格式
+        self.worker = AudioExtractWorker(file_path, selected_model, self.selected_output_format)
         self.worker.progress_updated.connect(self.state_manager.update_extract_progress)
         self.worker.text_extracted.connect(self.state_manager.complete_extract)
         self.worker.error_occurred.connect(self.state_manager.fail_extract)

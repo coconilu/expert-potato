@@ -12,10 +12,11 @@ class AudioExtractWorker(QThread):
     text_extracted = pyqtSignal(str)
     error_occurred = pyqtSignal(str)
 
-    def __init__(self, audio_file_path: str, model_name: str = "base"):
+    def __init__(self, audio_file_path: str, model_name: str = "base", output_format: str = "txt"):
         super().__init__()
         self.audio_file_path = audio_file_path
         self.model_name = model_name
+        self.output_format = output_format
 
     def is_cuda_available(self):
         """检查 CUDA 是否可用"""
@@ -129,13 +130,30 @@ class AudioExtractWorker(QThread):
             # 转录音频
             try:
                 segments, info = model.transcribe(self.audio_file_path)
-                # 将所有段落的文本合并
-                text_segments = []
-                for segment in segments:
-                    text_segments.append(segment.text)
-                text = AppConstants.AUDIO_EXTRACT_TEXT_JOIN_SEPARATOR.join(
-                    text_segments
-                )
+                
+                # 根据输出格式生成不同的内容
+                if self.output_format == AppConstants.OUTPUT_FORMAT_TXT:
+                    # 纯文本格式
+                    text_segments = []
+                    for segment in segments:
+                        text_segments.append(segment.text)
+                    text = AppConstants.AUDIO_EXTRACT_TEXT_JOIN_SEPARATOR.join(
+                        text_segments
+                    )
+                elif self.output_format == AppConstants.OUTPUT_FORMAT_SRT:
+                    # SRT字幕格式
+                    text = self._generate_srt_format(segments)
+                elif self.output_format == AppConstants.OUTPUT_FORMAT_VTT:
+                    # VTT字幕格式
+                    text = self._generate_vtt_format(segments)
+                else:
+                    # 默认使用纯文本格式
+                    text_segments = []
+                    for segment in segments:
+                        text_segments.append(segment.text)
+                    text = AppConstants.AUDIO_EXTRACT_TEXT_JOIN_SEPARATOR.join(
+                        text_segments
+                    )
             except Exception as e:
                 print(
                     AppConstants.AUDIO_EXTRACT_ERROR_TRANSCRIPTION_FAILED.format(
@@ -163,3 +181,42 @@ class AudioExtractWorker(QThread):
             self.error_occurred.emit(
                 AppConstants.AUDIO_EXTRACT_ERROR_GENERAL.format(error=str(e))
             )
+
+    def _generate_srt_format(self, segments):
+        """生成SRT格式的字幕"""
+        srt_content = []
+        for i, segment in enumerate(segments, 1):
+            start_time = self._format_timestamp_srt(segment.start)
+            end_time = self._format_timestamp_srt(segment.end)
+            srt_content.append(f"{i}")
+            srt_content.append(f"{start_time} --> {end_time}")
+            srt_content.append(segment.text.strip())
+            srt_content.append("")  # 空行分隔
+        return "\n".join(srt_content)
+
+    def _generate_vtt_format(self, segments):
+        """生成VTT格式的字幕"""
+        vtt_content = ["WEBVTT", ""]  # VTT文件头
+        for segment in segments:
+            start_time = self._format_timestamp_vtt(segment.start)
+            end_time = self._format_timestamp_vtt(segment.end)
+            vtt_content.append(f"{start_time} --> {end_time}")
+            vtt_content.append(segment.text.strip())
+            vtt_content.append("")  # 空行分隔
+        return "\n".join(vtt_content)
+
+    def _format_timestamp_srt(self, seconds):
+        """格式化时间戳为SRT格式 (HH:MM:SS,mmm)"""
+        hours = int(seconds // 3600)
+        minutes = int((seconds % 3600) // 60)
+        secs = int(seconds % 60)
+        milliseconds = int((seconds % 1) * 1000)
+        return f"{hours:02d}:{minutes:02d}:{secs:02d},{milliseconds:03d}"
+
+    def _format_timestamp_vtt(self, seconds):
+        """格式化时间戳为VTT格式 (HH:MM:SS.mmm)"""
+        hours = int(seconds // 3600)
+        minutes = int((seconds % 3600) // 60)
+        secs = int(seconds % 60)
+        milliseconds = int((seconds % 1) * 1000)
+        return f"{hours:02d}:{minutes:02d}:{secs:02d}.{milliseconds:03d}"
