@@ -15,6 +15,7 @@ from qfluentwidgets import (
     InfoBarPosition,
     FluentIcon as FIF,
     BodyLabel,
+    CaptionLabel,
     LineEdit,
     CardWidget,
 )
@@ -164,6 +165,18 @@ class RefineArea(CardWidget):
         self.refined_text.textChanged.connect(self.on_refined_text_changed)
         layout.addWidget(refined_label)
         layout.addWidget(self.refined_text)
+
+        # Prompt信息显示区域
+        prompt_info_layout = QHBoxLayout()
+        self.prompt_size_label = CaptionLabel("Prompt: 0.00 KB")
+        self.token_count_label = CaptionLabel("估算Token: 0")
+        self.prompt_size_label.setStyleSheet("color: #666; font-size: 12px;")
+        self.token_count_label.setStyleSheet("color: #666; font-size: 12px;")
+        prompt_info_layout.addWidget(self.prompt_size_label)
+        prompt_info_layout.addSpacing(20)
+        prompt_info_layout.addWidget(self.token_count_label)
+        prompt_info_layout.addStretch()
+        layout.addLayout(prompt_info_layout)
 
         # 复制修复后文案按钮
         copy_refined_layout = QHBoxLayout()
@@ -325,6 +338,8 @@ class RefineArea(CardWidget):
         self.refine_worker.text_refined.connect(self.on_text_refined)
         self.refine_worker.error_occurred.connect(self.on_refine_error)
         self.refine_worker.finished.connect(self.on_refine_finished)
+        # 连接Prompt信息信号
+        self.refine_worker.prompt_info_updated.connect(self.update_prompt_info)
         self.refine_worker.start()
 
         InfoBar.info(
@@ -379,6 +394,12 @@ class RefineArea(CardWidget):
         if self.refine_worker:
             self.refine_worker.deleteLater()
             self.refine_worker = None
+            
+    def update_prompt_info(self, prompt_kb: float, token_count: int):
+        """更新Prompt信息显示"""
+        if hasattr(self, 'prompt_size_label') and hasattr(self, 'token_count_label'):
+            self.prompt_size_label.setText(f"Prompt: {prompt_kb:.2f} KB")
+            self.token_count_label.setText(f"估算Token: {token_count}")
 
     def on_refined_text_changed(self):
         """修复后文案变化事件"""

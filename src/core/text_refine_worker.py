@@ -13,6 +13,7 @@ class TextRefineWorker(QThread):
     text_refined = pyqtSignal(str)
     error_occurred = pyqtSignal(str)
     domain_detected = pyqtSignal(str)
+    prompt_info_updated = pyqtSignal(float, int)  # 发射Prompt大小(KB)和Token数
 
     def __init__(self, text: str, api_key: str, api_url: str = None):
         super().__init__()
@@ -30,6 +31,19 @@ class TextRefineWorker(QThread):
 
             # 构建提示词
             prompt = AppConstants.DEEPSEEK_PROMPT_TEMPLATE.format(text=text)
+            
+            # 计算prompt的字节数和token数
+            prompt_bytes = len(prompt.encode('utf-8'))
+            prompt_kb = prompt_bytes / 1024
+            # 粗略估算token数：中文约1.5字符/token，英文约4字符/token
+            # 这里使用平均值2.5字符/token进行估算
+            estimated_tokens = len(prompt) / 2.5
+            
+            print(f"Prompt大小: {prompt_kb:.2f} KB ({prompt_bytes} bytes)")
+            print(f"估算Token数: {estimated_tokens:.0f} tokens")
+            
+            # 发射Prompt信息信号
+            self.prompt_info_updated.emit(prompt_kb, int(estimated_tokens))
 
             payload = {
                 AppConstants.DEEPSEEK_PARAM_MODEL: AppConstants.DEEPSEEK_DEFAULT_MODEL,
