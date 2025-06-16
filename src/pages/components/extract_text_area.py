@@ -111,10 +111,16 @@ class ExtractTextArea(CardWidget):
         self.result_text.setMinimumHeight(
             AppConstants.EXTRACT_AUDIO_RESULT_TEXT_MIN_HEIGHT
         )
-        # 监听文本变化事件，动态更新复制按钮状态
+        # 监听文本变化事件，动态更新复制按钮状态和字符数
         self.result_text.textChanged.connect(self.update_copy_button_state)
+        self.result_text.textChanged.connect(self.update_char_count)
         layout.addWidget(result_label)
         layout.addWidget(self.result_text)
+        
+        # 字符数显示标签
+        self.char_count_label = CaptionLabel(AppConstants.EXTRACT_AUDIO_CHAR_COUNT_TEXT.format(count=0))
+        self.char_count_label.setStyleSheet("color: #888; margin-top: 5px;")
+        layout.addWidget(self.char_count_label)
 
         # 复制按钮
         copy_layout = QHBoxLayout()
@@ -374,6 +380,12 @@ class ExtractTextArea(CardWidget):
         self.copy_button.setEnabled(bool(text))
         # 发射信号通知外部（保留向后兼容）
         self.text_extracted.emit(text)
+    
+    def update_char_count(self):
+        """更新字符数显示"""
+        text = self.result_text.toPlainText()
+        char_count = len(text)
+        self.char_count_label.setText(AppConstants.EXTRACT_AUDIO_CHAR_COUNT_TEXT.format(count=char_count))
 
     def get_extracted_text(self) -> str:
         """获取提取的文本"""

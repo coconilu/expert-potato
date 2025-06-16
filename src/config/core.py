@@ -93,6 +93,7 @@ class AppConstants:
     EXTRACT_AUDIO_RESULT_LABEL_TEXT = "提取结果："
     EXTRACT_AUDIO_RESULT_PLACEHOLDER = "提取的文案将显示在这里..."
     EXTRACT_AUDIO_COPY_BUTTON_TEXT = "复制文案"
+    EXTRACT_AUDIO_CHAR_COUNT_TEXT = "字符数：{count}"
 
     # 提取音频页面样式常量
     EXTRACT_AUDIO_NO_FILE_STYLE = "color: #888; padding: 10px;"
