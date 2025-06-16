@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (
     QLabel,
     QPushButton,
 )
-from PyQt6.QtCore import Qt, QThread, pyqtSignal
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QTimer
 from PyQt6.QtGui import QFont
 from qfluentwidgets import (
     InfoBar,
@@ -147,6 +147,12 @@ class ExtractAudioResourcePage(QWidget):
         self.status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.status_label)
 
+        # 进一步处理按钮（初始隐藏）
+        self.process_button = PrimaryPushButton(AppConstants.ONLINE_AUDIO_PROCESS_BUTTON)
+        self.process_button.clicked.connect(self.on_process_button_clicked)
+        self.process_button.setVisible(False)
+        layout.addWidget(self.process_button)
+
         layout.addStretch()
         self.setLayout(layout)
 
@@ -193,6 +199,7 @@ class ExtractAudioResourcePage(QWidget):
         # 显示进度条
         self.progress_bar.setVisible(True)
         self.progress_bar.setRange(0, 0)  # 无限进度条
+        self.process_button.setVisible(False)
 
         # 启动工作线程
         self.worker = AudioExtractWorker(url, self.temp_audio_dir)
@@ -215,19 +222,56 @@ class ExtractAudioResourcePage(QWidget):
         self.state_manager.set_file(file_path)
 
         # 显示成功信息
-        self.show_success_message(
+        self.status_label.setText(
             f"{AppConstants.ONLINE_AUDIO_MSG_COMPLETE}\n文件保存至: {file_path}"
         )
-        self.status_label.setText(AppConstants.ONLINE_AUDIO_MSG_COMPLETE)
 
-        # 清空输入框
-        self.url_input.clear()
+        # 保存文件路径并显示进一步处理按钮
+        self.extracted_file_path = file_path
+        self.process_button.setVisible(True)
+
+    def on_process_button_clicked(self):
+        """处理按钮点击事件"""
+        if hasattr(self, 'extracted_file_path') and self.extracted_file_path:
+            self.navigate_to_extract_audio_page(self.extracted_file_path)
+        else:
+            self.show_error_message("没有可处理的音频文件")
+
+    def navigate_to_extract_audio_page(self, file_path: str):
+        """跳转到音频处理页面"""
+        main_window = self.window()
+        if main_window and hasattr(main_window, 'navigation_manager'):
+            # 跳转到extract_audio页面
+            main_window.navigation_manager.set_current_item(AppConstants.ROUTE_EXTRACT_AUDIO)
+            main_window.show_page(AppConstants.ROUTE_EXTRACT_AUDIO)
+            
+            # 使用QTimer延迟设置文件路径，确保页面已经加载
+            QTimer.singleShot(100, lambda: self.set_file_to_extract_page(file_path))
+
+    def set_file_to_extract_page(self, file_path: str):
+        """设置文件路径到音频处理页面"""
+        try:
+            main_window = self.window()
+            if main_window and hasattr(main_window, 'pages_cache'):
+                # 获取extract_audio页面实例
+                extract_audio_page = main_window.pages_cache.get('extract_audio')
+                if extract_audio_page and hasattr(extract_audio_page, 'on_file_selected'):
+                    extract_audio_page.on_file_selected(file_path)
+                else:
+                    self.show_error_message("目标页面不支持文件设置")
+            else:
+                self.show_error_message("无法找到页面缓存")
+        except Exception as e:
+            self.show_error_message(f"文件路径设置失败: {str(e)}")
 
     def on_extraction_failed(self, error_message: str):
         """提取失败处理"""
         self.progress_bar.setVisible(False)
         self.extract_button.setEnabled(True)
         self.url_input.setEnabled(True)
+
+        # 隐藏进一步处理按钮
+        self.process_button.setVisible(False)
 
         self.show_error_message(
             f"{AppConstants.ONLINE_AUDIO_MSG_FAILED}\n{error_message}"

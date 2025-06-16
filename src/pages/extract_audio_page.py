@@ -57,8 +57,8 @@ class ExtractAudioPage(QWidget):
         self.drop_area.file_dropped.connect(self.on_file_selected)
 
         # 文件路径显示
-        self.file_path_label = BodyLabel(AppConstants.EXTRACT_AUDIO_NO_FILE_SELECTED)
-        self.file_path_label.setStyleSheet(AppConstants.EXTRACT_AUDIO_NO_FILE_STYLE)
+        # self.file_path_label = BodyLabel(AppConstants.EXTRACT_AUDIO_NO_FILE_SELECTED)
+        # self.file_path_label.setStyleSheet(AppConstants.EXTRACT_AUDIO_NO_FILE_STYLE)
 
         # 文本提取区域
         self.extract_text_area = ExtractTextArea()
@@ -67,7 +67,7 @@ class ExtractAudioPage(QWidget):
         # 添加到布局
         layout.addWidget(title_label)
         layout.addWidget(self.drop_area)
-        layout.addWidget(self.file_path_label)
+        # layout.addWidget(self.file_path_label)
         layout.addWidget(self.extract_text_area)
 
         # 文案修复区域
@@ -80,12 +80,12 @@ class ExtractAudioPage(QWidget):
         """文件选择事件"""
         self.current_file_path = file_path
         file_name = Path(file_path).name
-        self.file_path_label.setText(
-            f"{AppConstants.EXTRACT_AUDIO_FILE_SELECTED_PREFIX}{file_name}"
-        )
-        self.file_path_label.setStyleSheet(
-            AppConstants.EXTRACT_AUDIO_FILE_SELECTED_STYLE
-        )
+        # self.file_path_label.setText(
+        #     f"{AppConstants.EXTRACT_AUDIO_FILE_SELECTED_PREFIX}{file_name}"
+        # )
+        # self.file_path_label.setStyleSheet(
+        #     AppConstants.EXTRACT_AUDIO_FILE_SELECTED_STYLE
+        # )
         # 设置提取区域的文件路径
         self.extract_text_area.set_file_path(file_path)
 
