@@ -24,10 +24,12 @@ class AppConstants:
     # 页面路由键
     ROUTE_EXTRACT_AUDIO = "extract_audio"
     ROUTE_EXTRACT_TEXT = "extract_text"
+    ROUTE_EXTRACT_AUDIO_RESOURCE = "extract_audio_resource"
 
     # 导航文本
     NAV_TEXT_EXTRACT_AUDIO = "音视频转文案"
     NAV_TEXT_EXTRACT_TEXT = "提取文案"
+    NAV_TEXT_EXTRACT_AUDIO_RESOURCE = "在线音频提取"
     NAV_TEXT_SETTINGS = "配置"
 
     # 配置弹窗常量
@@ -46,6 +48,7 @@ class AppConstants:
     # 页面标题
     PAGE_TITLE_EXTRACT_AUDIO = "音视频转文案"
     PAGE_TITLE_EXTRACT_TEXT = "提取文案"
+    PAGE_TITLE_EXTRACT_AUDIO_RESOURCE = "在线音频提取"
 
     # 页面内容
     PAGE_CONTENT_EXTRACT_AUDIO = (
@@ -188,6 +191,15 @@ class AppConstants:
     FILE_DROP_HINT_TEXT = "拖拽音频或视频文件到此处\n或点击选择文件"
     FILE_DROP_DIALOG_TITLE = "选择音频或视频文件"
     FILE_DROP_DIALOG_FILTER = "媒体文件 (*.mp3 *.wav *.m4a *.flac *.aac *.ogg *.wma *.mp4 *.avi *.mov *.mkv *.wmv *.flv *.webm *.m4v)"
+    
+    # 在线音频提取常量
+    ONLINE_AUDIO_INPUT_PLACEHOLDER = "请输入YouTube或Bilibili视频链接"
+    ONLINE_AUDIO_EXTRACT_BUTTON = "提取音频"
+    ONLINE_AUDIO_MSG_PROCESSING = "正在下载并提取音频..."
+    ONLINE_AUDIO_MSG_COMPLETE = "音频提取完成"
+    ONLINE_AUDIO_MSG_FAILED = "音频提取失败"
+    ONLINE_AUDIO_MSG_INVALID_URL = "无效的视频链接"
+    ONLINE_AUDIO_SUPPORTED_PLATFORMS = ["youtube.com", "youtu.be", "bilibili.com", "b23.tv"]
 
     # 模型下载提示信息
     AUDIO_EXTRACT_MSG_DOWNLOADING = "正在下载模型，请稍候..."

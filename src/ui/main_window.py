@@ -17,6 +17,7 @@ from ui.navigation import NavigationManager
 from ui.title_bar import CustomTitleBar
 from pages import ExtractAudioPage
 from pages import ExtractTextPage
+from pages import ExtractAudioResourcePage
 
 
 class MainWindow(QMainWindow):
@@ -121,6 +122,14 @@ class MainWindow(QMainWindow):
             icon=FluentIcon.DOCUMENT,
             text=AppConstants.NAV_TEXT_EXTRACT_TEXT,
             page_factory=ExtractTextPage,
+            position=NavigationItemPosition.TOP,
+        )
+
+        self.navigation_manager.add_navigation_item(
+            route_key=AppConstants.ROUTE_EXTRACT_AUDIO_RESOURCE,
+            icon=FluentIcon.DOWNLOAD,
+            text=AppConstants.NAV_TEXT_EXTRACT_AUDIO_RESOURCE,
+            page_factory=ExtractAudioResourcePage,
             position=NavigationItemPosition.TOP,
         )
 

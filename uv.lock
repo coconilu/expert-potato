@@ -219,6 +219,7 @@ test = [
 ]
 video = [
     { name = "moviepy" },
+    { name = "yt-dlp" },
 ]
 
 [package.metadata]
@@ -238,6 +239,7 @@ requires-dist = [
     { name = "requests", specifier = ">=2.31.0" },
     { name = "torch", specifier = ">=2.6.0", index = "https://download.pytorch.org/whl/cu128" },
     { name = "torchaudio", specifier = ">=2.6.0", index = "https://download.pytorch.org/whl/cu128" },
+    { name = "yt-dlp", marker = "extra == 'video'", specifier = ">=2023.12.30" },
 ]
 provides-extras = ["dev", "test", "video"]
 
@@ -3868,4 +3870,13 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/c2/51/32da03cf19d17d46cce5c731967bf58de9bd71db3a379932f53b094deda4/urllib3-1.26.13.tar.gz", hash = "sha256:c083dd0dce68dbfbe1129d5271cb90f9447dea7d52097c6e0126120c521ddea8", size = 300476, upload-time = "2022-11-23T22:34:32.145Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/65/0c/cc6644eaa594585e5875f46f3c83ee8762b647b51fc5b0fb253a242df2dc/urllib3-1.26.13-py2.py3-none-any.whl", hash = "sha256:47cc05d99aaa09c9e72ed5809b60e7ba354e64b59c9c173ac3018642d8bb41fc", size = 140572, upload-time = "2022-11-23T22:34:29.785Z" },
+]
+
+[[package]]
+name = "yt-dlp"
+version = "2025.6.9"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b7/fb/588a23e61586960273524d3aa726bd148116d422854f727f4d59c254cb6a/yt_dlp-2025.6.9.tar.gz", hash = "sha256:751f53a3b61353522bf805fa30bbcbd16666126537e39706eab4f8c368f111ac", size = 3028379, upload-time = "2025-06-09T23:53:10.448Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fd/e1/fa0dd2150b7b1033d917f37067c594160772fa607f311f10d4b881768b36/yt_dlp-2025.6.9-py3-none-any.whl", hash = "sha256:ebdfda9ffa807f6a26aed7c8f906e5557cd06b4c388dc547df1ec2078631fca8", size = 3276143, upload-time = "2025-06-09T23:53:07.746Z" },
 ]
