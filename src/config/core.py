@@ -162,7 +162,7 @@ class AppConstants:
     AUDIO_EXTRACT_DEVICE_CPU = "cpu"
     AUDIO_EXTRACT_COMPUTE_TYPE_CUDA = "float16"
     AUDIO_EXTRACT_COMPUTE_TYPE_CPU = "int8"
-    AUDIO_EXTRACT_TEXT_JOIN_SEPARATOR = ""
+    AUDIO_EXTRACT_TEXT_JOIN_SEPARATOR = "\n"
 
     # 输出格式常量
     OUTPUT_FORMAT_TXT = "txt"
@@ -178,21 +178,38 @@ class AppConstants:
     AUDIO_EXTRACT_DOWNLOAD_CHUNK_SIZE = 8192  # 下载块大小
 
     # 视频音频提取常量
-    SUPPORTED_VIDEO_EXTENSIONS = [".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv", ".webm", ".m4v"]
-    SUPPORTED_AUDIO_EXTENSIONS = [".mp3", ".wav", ".m4a", ".flac", ".aac", ".ogg", ".wma"]
+    SUPPORTED_VIDEO_EXTENSIONS = [
+        ".mp4",
+        ".avi",
+        ".mov",
+        ".mkv",
+        ".wmv",
+        ".flv",
+        ".webm",
+        ".m4v",
+    ]
+    SUPPORTED_AUDIO_EXTENSIONS = [
+        ".mp3",
+        ".wav",
+        ".m4a",
+        ".flac",
+        ".aac",
+        ".ogg",
+        ".wma",
+    ]
     VIDEO_EXTRACT_TIMEOUT = 300  # 视频处理超时时间（秒）
     VIDEO_EXTRACT_TEMP_DIR = "temp_audio"  # 临时音频文件目录
-    
+
     # 视频处理提示信息
     VIDEO_EXTRACT_MSG_PROCESSING = "正在从视频中提取音频..."
     VIDEO_EXTRACT_MSG_COMPLETE = "音频提取完成"
     VIDEO_EXTRACT_MSG_FAILED = "音频提取失败"
-    
+
     # 文件选择提示更新
     FILE_DROP_HINT_TEXT = "拖拽音频或视频文件到此处\n或点击选择文件"
     FILE_DROP_DIALOG_TITLE = "选择音频或视频文件"
     FILE_DROP_DIALOG_FILTER = "媒体文件 (*.mp3 *.wav *.m4a *.flac *.aac *.ogg *.wma *.mp4 *.avi *.mov *.mkv *.wmv *.flv *.webm *.m4v)"
-    
+
     # 在线音频提取常量
     ONLINE_AUDIO_INPUT_PLACEHOLDER = "请输入YouTube或Bilibili视频链接"
     ONLINE_AUDIO_EXTRACT_BUTTON = "提取音频"
@@ -200,7 +217,12 @@ class AppConstants:
     ONLINE_AUDIO_MSG_COMPLETE = "音频提取完成"
     ONLINE_AUDIO_MSG_FAILED = "音频提取失败"
     ONLINE_AUDIO_MSG_INVALID_URL = "无效的视频链接"
-    ONLINE_AUDIO_SUPPORTED_PLATFORMS = ["youtube.com", "youtu.be", "bilibili.com", "b23.tv"]
+    ONLINE_AUDIO_SUPPORTED_PLATFORMS = [
+        "youtube.com",
+        "youtu.be",
+        "bilibili.com",
+        "b23.tv",
+    ]
     ONLINE_AUDIO_PROCESS_BUTTON = "进一步处理音频"
 
     # 模型下载提示信息

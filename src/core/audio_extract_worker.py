@@ -12,7 +12,9 @@ class AudioExtractWorker(QThread):
     text_extracted = pyqtSignal(str)
     error_occurred = pyqtSignal(str)
 
-    def __init__(self, audio_file_path: str, model_name: str = "base", output_format: str = "txt"):
+    def __init__(
+        self, audio_file_path: str, model_name: str = "base", output_format: str = "txt"
+    ):
         super().__init__()
         self.audio_file_path = audio_file_path
         self.model_name = model_name
@@ -130,12 +132,13 @@ class AudioExtractWorker(QThread):
             # 转录音频
             try:
                 segments, info = model.transcribe(self.audio_file_path)
-                
+
                 # 根据输出格式生成不同的内容
                 if self.output_format == AppConstants.OUTPUT_FORMAT_TXT:
                     # 纯文本格式
                     text_segments = []
                     for segment in segments:
+                        print("segment.text", segment.text)
                         text_segments.append(segment.text)
                     text = AppConstants.AUDIO_EXTRACT_TEXT_JOIN_SEPARATOR.join(
                         text_segments
@@ -170,6 +173,8 @@ class AudioExtractWorker(QThread):
             )
 
             self.progress_updated.emit(AppConstants.AUDIO_EXTRACT_PROGRESS_COMPLETE)
+
+            print("text", len(text))
 
             # 发送结果
             self.text_extracted.emit(text)
