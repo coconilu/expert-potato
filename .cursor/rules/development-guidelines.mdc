@@ -1,0 +1,72 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 开发指南
+
+## 代码规范
+- 遵循 PEP 8 编码规范
+- 使用类型注解提高代码可读性
+- 模块化设计，保持低耦合高内聚
+- 常量统一在 [src/config/core.py](mdc:src/config/core.py) 中管理
+- UI 样式在 [src/config/theme.py](mdc:src/config/theme.py) 中配置
+
+## 开发环境设置
+1. **安装依赖**
+   ```bash
+   # 使用 uv (推荐)
+   uv venv
+   uv sync
+   
+   # 或使用 pip
+   pip install -e ".[dev,test]"
+   ```
+
+2. **运行开发服务器**
+   - 使用热更新: [run_dev.bat](mdc:run_dev.bat) 或 [run_dev.py](mdc:run_dev.py)
+   - 热更新配置说明: [HOT_RELOAD.md](mdc:HOT_RELOAD.md)
+   - 直接运行: `python src/main.py`
+
+## 测试
+- **测试配置**: [pytest.ini](mdc:pytest.ini)
+- **测试目录**: `tests/`
+- 运行测试: `pytest`
+- 运行覆盖率测试: `pytest --cov=src`
+
+## 页面开发模式
+1. 所有页面继承自 [src/ui/base_page.py](mdc:src/ui/base_page.py) 中的 `BasePage`
+2. 页面文件放在 `src/pages/` 目录下
+3. 使用 Fluent Design 组件库的控件
+4. 页面导航在 [src/ui/navigation.py](mdc:src/ui/navigation.py) 中配置
+
+## 音频处理
+- 音频提取功能实现: [src/pages/extract_audio_page.py](mdc:src/pages/extract_audio_page.py)
+- 使用 Faster-Whisper 进行语音识别
+- 支持拖拽和点击选择文件
+- 实时显示处理进度
+
+## 构建发布
+1. **构建可执行文件**
+   ```bash
+   # Windows
+   build.bat
+   
+   # 或直接运行
+   python build.py
+   ```
+
+2. **构建输出**
+   - 输出目录: `dist/`
+   - 构建详细说明: [build_instructions.md](mdc:build_instructions.md)
+
+## 依赖管理
+- 核心依赖在 [pyproject.toml](mdc:pyproject.toml) 中定义
+- 开发依赖使用 `[project.optional-dependencies.dev]`
+- 测试依赖使用 `[project.optional-dependencies.test]`
+- 视频处理依赖使用 `[project.optional-dependencies.video]`
+
+## 注意事项
+- 首次使用 Whisper 时会自动下载模型文件（约 140MB）
+- Windows 开发需要注意路径分隔符
+- UI 开发时注意保持 Fluent Design 风格的一致性

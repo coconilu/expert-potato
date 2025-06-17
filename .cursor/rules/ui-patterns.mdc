@@ -1,0 +1,81 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# UI 开发模式
+
+## PyQt6 + Fluent Design 架构
+
+### 主窗口结构
+- **主窗口类**: [src/ui/main_window.py](mdc:src/ui/main_window.py)
+- 使用 `MSFluentWindow` 作为主窗口基类
+- 包含导航栏、标题栏和内容区域
+
+### 页面基类模式
+所有页面都应继承自 [src/ui/base_page.py](mdc:src/ui/base_page.py) 中的 `BasePage`:
+```python
+class MyPage(BasePage):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setObjectName("MyPage")
+        self._setupUi()
+```
+
+### 常用 Fluent Widgets 组件
+- **按钮**: `PrimaryPushButton`, `PushButton`, `TransparentPushButton`
+- **输入**: `LineEdit`, `TextEdit`, `PlainTextEdit`
+- **卡片**: `CardWidget`, `SimpleCardWidget`, `HeaderCardWidget`
+- **进度**: `ProgressBar`, `IndeterminateProgressBar`
+- **对话框**: `MessageBox`, `Dialog`
+- **列表**: `ListWidget`, `ListView`
+- **标签**: `BodyLabel`, `StrongBodyLabel`, `SubtitleLabel`
+
+### 拖拽文件实现模式
+参考 [src/pages/extract_audio_page.py](mdc:src/pages/extract_audio_page.py):
+1. 设置 `setAcceptDrops(True)`
+2. 重写 `dragEnterEvent` 和 `dropEvent`
+3. 使用 `event.mimeData().hasUrls()` 检查文件
+
+### 样式和主题
+- 主题配置: [src/config/theme.py](mdc:src/config/theme.py)
+- 使用 `setTheme()` 设置主题
+- 支持亮色/暗色主题切换
+- 自定义样式使用 QSS
+
+### 布局最佳实践
+1. **垂直布局**: `QVBoxLayout` - 主要内容布局
+2. **水平布局**: `QHBoxLayout` - 按钮组、工具栏
+3. **网格布局**: `QGridLayout` - 表单、复杂布局
+4. **使用 Spacer**: 灵活控制组件间距
+
+### 信号与槽
+```python
+# 连接信号
+self.button.clicked.connect(self.on_button_clicked)
+
+# 自定义信号
+class MyWidget(QWidget):
+    customSignal = pyqtSignal(str)
+```
+
+### 异步操作模式
+对于耗时操作（如音频处理）:
+1. 使用 `QThread` 避免阻塞 UI
+2. 通过信号更新进度
+3. 使用 `ThreadWorker` 模式
+
+### 错误处理
+- 使用 `MessageBox` 显示错误信息
+- 捕获异常并友好提示用户
+- 记录详细错误日志
+
+### 国际化准备
+- 字符串常量集中在 [src/config/core.py](mdc:src/config/core.py)
+- 使用 `QTranslator` 支持多语言
+- UI 文本避免硬编码
+
+### 响应式设计
+- 使用 `setSizePolicy` 控制组件缩放
+- 设置最小尺寸 `setMinimumSize`
+- 使用 `Stretch` 因子调整布局比例

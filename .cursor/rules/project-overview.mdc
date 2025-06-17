@@ -1,0 +1,47 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Expert Potato 项目概述
+
+## 项目简介
+Expert Potato 是一个基于 PyQt6 和 Fluent Design 的现代化剪辑工具应用，主要功能包括音频文件的语音识别和文案提取。
+
+## 项目结构
+- **入口文件**: [src/main.py](mdc:src/main.py) - 应用程序主入口，支持热更新
+- **主窗口**: [src/ui/main_window.py](mdc:src/ui/main_window.py) - 应用程序主窗口
+- **配置文件**: [pyproject.toml](mdc:pyproject.toml) - 项目依赖和配置
+
+## 主要目录说明
+- `src/` - 源代码目录
+  - `assets/` - 资源文件（图标、图片等）
+  - `config/` - 配置模块
+    - [core.py](mdc:src/config/core.py) - 核心常量配置
+    - [theme.py](mdc:src/config/theme.py) - 主题配置
+  - `pages/` - 页面组件
+    - [extract_audio_page.py](mdc:src/pages/extract_audio_page.py) - 音频提取页面
+    - [extract_text_page.py](mdc:src/pages/extract_text_page.py) - 文案提取页面
+  - `ui/` - UI 组件
+    - [base_page.py](mdc:src/ui/base_page.py) - 页面基类
+    - [navigation.py](mdc:src/ui/navigation.py) - 导航组件
+    - [title_bar.py](mdc:src/ui/title_bar.py) - 标题栏
+  - `utils/` - 工具模块
+  - `core/` - 核心业务逻辑
+
+## 技术栈
+- **UI 框架**: PyQt6
+- **UI 组件库**: PyQt6-Fluent-Widgets
+- **语音识别**: Faster-Whisper（OpenAI Whisper 的优化版本）
+- **深度学习**: PyTorch + TorchAudio
+- **包管理**: uv
+- **Python 版本**: 3.11.12+
+
+## 支持的音频格式
+MP3, WAV, M4A, FLAC, AAC, OGG, WMA
+
+## 构建相关
+- **构建脚本**: [build.py](mdc:build.py) - PyInstaller 构建脚本
+- **构建配置**: [Expert Potato.spec](mdc:Expert Potato.spec) - PyInstaller 规格文件
+- **构建批处理**: [build.bat](mdc:build.bat) - Windows 构建批处理文件
+- **构建说明**: [build_instructions.md](mdc:build_instructions.md) - 详细构建指南

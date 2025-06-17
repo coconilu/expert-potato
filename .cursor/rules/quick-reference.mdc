@@ -1,0 +1,136 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 快速参考指南
+
+## 常用命令
+
+### 开发环境
+```bash
+# 安装依赖
+uv sync
+
+# 运行应用（开发模式）
+python src/main.py
+
+# 热更新模式
+run_dev.bat  # Windows
+python run_dev.py  # 跨平台
+
+# 运行测试
+pytest
+pytest --cov=src  # 带覆盖率
+
+# 构建可执行文件
+build.bat  # Windows
+python build.py
+```
+
+### Git 工作流
+```bash
+# 功能开发
+git checkout -b feature/功能名称
+git add .
+git commit -m "feat: 添加新功能"
+git push origin feature/功能名称
+
+# 修复 bug
+git checkout -b fix/问题描述
+git commit -m "fix: 修复问题"
+```
+
+## 常见问题解答
+
+### Q: 如何添加新的依赖？
+A: 在 [pyproject.toml](mdc:pyproject.toml) 中添加依赖，然后运行 `uv sync`
+
+### Q: 热更新不工作？
+A: 检查 [HOT_RELOAD.md](mdc:HOT_RELOAD.md)，确保使用 `run_dev.bat` 或设置环境变量 `WATCHDOG_RUNNING=true`
+
+### Q: Whisper 模型下载失败？
+A: 模型会自动下载到 `.cache` 目录，如果失败可以手动下载放到对应位置
+
+### Q: 构建的 exe 文件太大？
+A: 查看 [build_instructions.md](mdc:build_instructions.md) 中的优化建议
+
+### Q: 如何添加新的页面？
+A: 参考 [feature-development.mdc](mdc:.cursor/rules/feature-development.mdc) 中的新功能开发模板
+
+## 项目结构快速导航
+
+### 核心文件
+- 应用入口: [src/main.py](mdc:src/main.py)
+- 主窗口: [src/ui/main_window.py](mdc:src/ui/main_window.py)
+- 配置: [src/config/core.py](mdc:src/config/core.py)
+
+### 功能页面
+- 音频提取: [src/pages/extract_audio_page.py](mdc:src/pages/extract_audio_page.py)
+- 文案提取: [src/pages/extract_text_page.py](mdc:src/pages/extract_text_page.py)
+
+### 构建相关
+- 构建脚本: [build.py](mdc:build.py)
+- 构建配置: [Expert Potato.spec](mdc:Expert Potato.spec)
+- 构建说明: [build_instructions.md](mdc:build_instructions.md)
+
+## 代码片段
+
+### 创建 Fluent 按钮
+```python
+from qfluentwidgets import PrimaryPushButton
+
+button = PrimaryPushButton("按钮文本", self)
+button.clicked.connect(self.on_button_click)
+```
+
+### 显示消息框
+```python
+from qfluentwidgets import MessageBox
+
+MessageBox.information(self, "标题", "消息内容")
+MessageBox.critical(self, "错误", "错误信息")
+```
+
+### 文件对话框
+```python
+from PyQt6.QtWidgets import QFileDialog
+
+file_path, _ = QFileDialog.getOpenFileName(
+    self, "选择文件", "", "音频文件 (*.mp3 *.wav *.m4a)"
+)
+```
+
+### 异步任务模式
+```python
+from PyQt6.QtCore import QThread, pyqtSignal
+
+class WorkerThread(QThread):
+    progress = pyqtSignal(int)
+    finished = pyqtSignal(str)
+    
+    def run(self):
+        # 执行任务
+        self.progress.emit(50)
+        self.finished.emit("完成")
+```
+
+## 调试技巧
+
+1. **查看 UI 对象树**
+   - 使用 Qt Designer 或 Qt Inspector
+
+2. **打印调试信息**
+   ```python
+   print(f"[DEBUG] 变量值: {variable}")
+   ```
+
+3. **使用断点调试**
+   - VS Code: F5 启动调试
+   - 设置断点: 点击行号左侧
+
+4. **检查信号连接**
+   ```python
+   # 确认信号是否连接
+   print(button.receivers(button.clicked))
+   ```
