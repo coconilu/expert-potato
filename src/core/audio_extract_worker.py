@@ -229,10 +229,10 @@ class AudioExtractWorker(QThread):
         """将文本保存到临时文件"""
         try:
             self._ensure_temp_txt_dir()
-            
+
             # 获取音频文件名（不含扩展名）
             audio_filename = Path(self.audio_file_path).stem
-            
+
             # 根据输出格式确定文件扩展名
             if self.output_format == AppConstants.OUTPUT_FORMAT_SRT:
                 file_extension = ".srt"
@@ -240,17 +240,17 @@ class AudioExtractWorker(QThread):
                 file_extension = ".vtt"
             else:
                 file_extension = ".txt"
-            
+
             # 构建输出文件路径
             output_filename = f"{audio_filename}{file_extension}"
             self.output_file_path = os.path.join(self.temp_txt_dir, output_filename)
-            
+
             # 保存文件
-            with open(self.output_file_path, 'w', encoding='utf-8') as f:
+            with open(self.output_file_path, "w", encoding="utf-8") as f:
                 f.write(text)
-                
+
             print(f"文本已保存到: {self.output_file_path}")
-            
+
         except Exception as e:
             print(f"保存文本文件失败: {str(e)}")
             self.output_file_path = None
