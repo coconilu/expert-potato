@@ -1,6 +1,8 @@
 """音频提取工作线程模块"""
 
 import os
+import tempfile
+from pathlib import Path
 from PyQt6.QtCore import QThread, pyqtSignal
 from config.core import AppConstants
 
@@ -19,6 +21,8 @@ class AudioExtractWorker(QThread):
         self.audio_file_path = audio_file_path
         self.model_name = model_name
         self.output_format = output_format
+        self.temp_txt_dir = None
+        self.output_file_path = None
 
     def is_cuda_available(self):
         """检查 CUDA 是否可用"""
@@ -138,7 +142,7 @@ class AudioExtractWorker(QThread):
                     # 纯文本格式
                     text_segments = []
                     for segment in segments:
-                        print("segment.text", segment.text)
+                        print("txt format: ", segment.text)
                         text_segments.append(segment.text)
                     text = AppConstants.AUDIO_EXTRACT_TEXT_JOIN_SEPARATOR.join(
                         text_segments
@@ -174,7 +178,10 @@ class AudioExtractWorker(QThread):
 
             self.progress_updated.emit(AppConstants.AUDIO_EXTRACT_PROGRESS_COMPLETE)
 
-            print("text", len(text))
+            print("txt result len: ", len(text))
+
+            # 保存文本到临时文件
+            self._save_text_to_file(text)
 
             # 发送结果
             self.text_extracted.emit(text)
@@ -209,6 +216,44 @@ class AudioExtractWorker(QThread):
             vtt_content.append(segment.text.strip())
             vtt_content.append("")  # 空行分隔
         return "\n".join(vtt_content)
+
+    def _ensure_temp_txt_dir(self):
+        """确保TXT输出临时文件夹存在"""
+        if not self.temp_txt_dir:
+            self.temp_txt_dir = os.path.join(
+                tempfile.gettempdir(), AppConstants.TXT_OUTPUT_TEMP_DIR
+            )
+            os.makedirs(self.temp_txt_dir, exist_ok=True)
+
+    def _save_text_to_file(self, text: str):
+        """将文本保存到临时文件"""
+        try:
+            self._ensure_temp_txt_dir()
+            
+            # 获取音频文件名（不含扩展名）
+            audio_filename = Path(self.audio_file_path).stem
+            
+            # 根据输出格式确定文件扩展名
+            if self.output_format == AppConstants.OUTPUT_FORMAT_SRT:
+                file_extension = ".srt"
+            elif self.output_format == AppConstants.OUTPUT_FORMAT_VTT:
+                file_extension = ".vtt"
+            else:
+                file_extension = ".txt"
+            
+            # 构建输出文件路径
+            output_filename = f"{audio_filename}{file_extension}"
+            self.output_file_path = os.path.join(self.temp_txt_dir, output_filename)
+            
+            # 保存文件
+            with open(self.output_file_path, 'w', encoding='utf-8') as f:
+                f.write(text)
+                
+            print(f"文本已保存到: {self.output_file_path}")
+            
+        except Exception as e:
+            print(f"保存文本文件失败: {str(e)}")
+            self.output_file_path = None
 
     def _format_timestamp_srt(self, seconds):
         """格式化时间戳为SRT格式 (HH:MM:SS,mmm)"""

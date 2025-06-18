@@ -185,7 +185,6 @@ class AppConstants:
         ".mkv",
         ".wmv",
         ".flv",
-        ".webm",
         ".m4v",
     ]
     SUPPORTED_AUDIO_EXTENSIONS = [
@@ -195,10 +194,12 @@ class AppConstants:
         ".flac",
         ".aac",
         ".ogg",
+        ".webm",
         ".wma",
     ]
     VIDEO_EXTRACT_TIMEOUT = 300  # 视频处理超时时间（秒）
     VIDEO_EXTRACT_TEMP_DIR = "temp_audio"  # 临时音频文件目录
+    TXT_OUTPUT_TEMP_DIR = "txt_output"  # 纯文本输出文件目录
 
     # 视频处理提示信息
     VIDEO_EXTRACT_MSG_PROCESSING = "正在从视频中提取音频..."

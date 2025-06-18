@@ -1,5 +1,9 @@
 """文本提取区域组件模块"""
 
+import os
+import subprocess
+import platform
+import tempfile
 from pathlib import Path
 from PyQt6.QtWidgets import (
     QWidget,
@@ -121,6 +125,23 @@ class ExtractTextArea(CardWidget):
         self.char_count_label = CaptionLabel(AppConstants.EXTRACT_AUDIO_CHAR_COUNT_TEXT.format(count=0))
         self.char_count_label.setStyleSheet("color: #888; margin-top: 5px;")
         layout.addWidget(self.char_count_label)
+        
+        # 文件路径显示和打开文件夹按钮
+        self.file_path_layout = QHBoxLayout()
+        self.file_path_label = CaptionLabel("")
+        self.file_path_label.setStyleSheet("color: #666; margin-top: 5px;")
+        self.file_path_label.hide()  # 初始隐藏
+        
+        self.open_folder_button = PushButton("打开文件夹")
+        self.open_folder_button.setIcon(FIF.FOLDER)
+        self.open_folder_button.clicked.connect(self.open_output_folder)
+        self.open_folder_button.hide()  # 初始隐藏
+        self.open_folder_button.setMaximumWidth(120)
+        
+        self.file_path_layout.addWidget(self.file_path_label)
+        self.file_path_layout.addStretch()
+        self.file_path_layout.addWidget(self.open_folder_button)
+        layout.addLayout(self.file_path_layout)
 
         # 复制按钮
         copy_layout = QHBoxLayout()
@@ -322,6 +343,9 @@ class ExtractTextArea(CardWidget):
         self.result_text.setPlainText(text)
         # 发射信号通知外部（保留向后兼容）
         self.text_extracted.emit(text)
+        
+        # 显示文件路径和打开文件夹按钮
+        self.show_output_file_info()
 
         InfoBar.success(
             title=AppConstants.EXTRACT_AUDIO_COMPLETE_TITLE,
@@ -371,6 +395,70 @@ class ExtractTextArea(CardWidget):
                 isClosable=True,
                 position=InfoBarPosition.TOP,
                 duration=AppConstants.EXTRACT_AUDIO_COPY_DURATION,
+                parent=self,
+            )
+    
+    def show_output_file_info(self):
+        """显示输出文件信息"""
+        if self.worker and hasattr(self.worker, 'output_file_path') and self.worker.output_file_path:
+            file_path = self.worker.output_file_path
+            file_name = os.path.basename(file_path)
+            self.file_path_label.setText(f"文件已保存: {file_name}")
+            self.file_path_label.show()
+            self.open_folder_button.show()
+        else:
+            self.file_path_label.hide()
+            self.open_folder_button.hide()
+    
+    def open_output_folder(self):
+        """打开输出文件夹"""
+        print(f"点击打开文件夹按钮")
+        print(f"worker存在: {self.worker is not None}")
+        
+        if self.worker:
+            print(f"worker有temp_txt_dir属性: {hasattr(self.worker, 'temp_txt_dir')}")
+            if hasattr(self.worker, 'temp_txt_dir'):
+                print(f"temp_txt_dir值: {self.worker.temp_txt_dir}")
+        
+        # 尝试从worker获取文件夹路径
+        folder_path = None
+        if self.worker and hasattr(self.worker, 'temp_txt_dir') and self.worker.temp_txt_dir:
+            folder_path = self.worker.temp_txt_dir
+        else:
+            # 如果worker不可用，尝试直接构建路径
+            folder_path = os.path.join(tempfile.gettempdir(), AppConstants.TXT_OUTPUT_TEMP_DIR)
+            
+        print(f"最终使用的文件夹路径: {folder_path}")
+        
+        if folder_path and os.path.exists(folder_path):
+            try:
+                if platform.system() == "Windows":
+                    os.startfile(folder_path)
+                elif platform.system() == "Darwin":  # macOS
+                    subprocess.run(["open", folder_path])
+                else:  # Linux
+                    subprocess.run(["xdg-open", folder_path])
+                print(f"成功打开文件夹: {folder_path}")
+            except Exception as e:
+                print(f"打开文件夹失败: {str(e)}")
+                InfoBar.error(
+                    title="错误",
+                    content=f"无法打开文件夹: {str(e)}",
+                    orient=Qt.Orientation.Horizontal,
+                    isClosable=True,
+                    position=InfoBarPosition.TOP,
+                    duration=3000,
+                    parent=self,
+                )
+        else:
+            print(f"文件夹不存在: {folder_path}")
+            InfoBar.warning(
+                title="提示",
+                content="输出文件夹不存在，请先进行文本提取",
+                orient=Qt.Orientation.Horizontal,
+                isClosable=True,
+                position=InfoBarPosition.TOP,
+                duration=3000,
                 parent=self,
             )
 
