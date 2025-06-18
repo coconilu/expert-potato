@@ -15,12 +15,13 @@ class AudioExtractWorker(QThread):
     error_occurred = pyqtSignal(str)
 
     def __init__(
-        self, audio_file_path: str, model_name: str = "base", output_format: str = "txt"
+        self, audio_file_path: str, model_name: str = "base", output_format: str = "txt", use_gpu: bool = True
     ):
         super().__init__()
         self.audio_file_path = audio_file_path
         self.model_name = model_name
         self.output_format = output_format
+        self.use_gpu = use_gpu
         self.temp_txt_dir = None
         self.output_file_path = None
 
@@ -72,16 +73,13 @@ class AudioExtractWorker(QThread):
                 )
                 self.progress_updated.emit(10)
 
-            device = (
-                AppConstants.AUDIO_EXTRACT_DEVICE_CUDA
-                if self.is_cuda_available()
-                else AppConstants.AUDIO_EXTRACT_DEVICE_CPU
-            )
-            compute_type = (
-                AppConstants.AUDIO_EXTRACT_COMPUTE_TYPE_CUDA
-                if device == AppConstants.AUDIO_EXTRACT_DEVICE_CUDA
-                else AppConstants.AUDIO_EXTRACT_COMPUTE_TYPE_CPU
-            )
+            # 根据用户选择和硬件支持决定设备类型
+            if self.use_gpu and self.is_cuda_available():
+                device = AppConstants.AUDIO_EXTRACT_DEVICE_CUDA
+                compute_type = AppConstants.AUDIO_EXTRACT_COMPUTE_TYPE_CUDA
+            else:
+                device = AppConstants.AUDIO_EXTRACT_DEVICE_CPU
+                compute_type = AppConstants.AUDIO_EXTRACT_COMPUTE_TYPE_CPU
 
             # 创建模型实例（如果需要会自动下载）
             model = WhisperModel(

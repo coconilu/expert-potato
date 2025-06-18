@@ -23,6 +23,7 @@ from qfluentwidgets import (
     CaptionLabel,
     ComboBox,
     CardWidget,
+    CheckBox,
 )
 from config.core import AppConstants
 from core import AudioExtractWorker, get_state_manager, ExtractState
@@ -84,6 +85,10 @@ class ExtractTextArea(CardWidget):
         self.output_format_combo.setCurrentText(AppConstants.OUTPUT_FORMAT_DEFAULT)
         self.output_format_combo.currentTextChanged.connect(self.on_output_format_changed)
 
+        # GPU模式选择
+        self.gpu_mode_checkbox = CheckBox(AppConstants.EXTRACT_AUDIO_GPU_MODE_TEXT)
+        self.gpu_mode_checkbox.setChecked(AppConstants.EXTRACT_AUDIO_GPU_MODE_DEFAULT)
+        
         # 提取按钮
         self.extract_button = PushButton(AppConstants.EXTRACT_AUDIO_EXTRACT_BUTTON_TEXT)
         self.extract_button.setIcon(FIF.MICROPHONE)
@@ -94,6 +99,7 @@ class ExtractTextArea(CardWidget):
         model_layout.addWidget(self.model_status_label)
         model_layout.addWidget(output_format_label)
         model_layout.addWidget(self.output_format_combo)
+        model_layout.addWidget(self.gpu_mode_checkbox)
         model_layout.addWidget(self.extract_button)
         model_layout.addStretch()
         layout.addLayout(model_layout)
@@ -314,8 +320,11 @@ class ExtractTextArea(CardWidget):
         # 清空结果文本
         self.result_text.clear()
 
-        # 创建工作线程，传入选择的模型和输出格式
-        self.worker = AudioExtractWorker(file_path, selected_model, self.selected_output_format)
+        # 获取GPU模式设置
+        use_gpu = self.gpu_mode_checkbox.isChecked()
+        
+        # 创建工作线程，传入选择的模型、输出格式和GPU模式
+        self.worker = AudioExtractWorker(file_path, selected_model, self.selected_output_format, use_gpu)
         self.worker.progress_updated.connect(self.state_manager.update_extract_progress)
         self.worker.text_extracted.connect(self.state_manager.complete_extract)
         self.worker.error_occurred.connect(self.state_manager.fail_extract)
