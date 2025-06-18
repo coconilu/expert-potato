@@ -23,12 +23,10 @@ class AppConstants:
 
     # 页面路由键
     ROUTE_EXTRACT_AUDIO = "extract_audio"
-    ROUTE_EXTRACT_TEXT = "extract_text"
     ROUTE_EXTRACT_AUDIO_RESOURCE = "extract_audio_resource"
 
     # 导航文本
     NAV_TEXT_EXTRACT_AUDIO = "音视频转文案"
-    NAV_TEXT_EXTRACT_TEXT = "提取文案"
     NAV_TEXT_EXTRACT_AUDIO_RESOURCE = "在线音频提取"
     NAV_TEXT_SETTINGS = "配置"
 
@@ -47,7 +45,6 @@ class AppConstants:
 
     # 页面标题
     PAGE_TITLE_EXTRACT_AUDIO = "音视频转文案"
-    PAGE_TITLE_EXTRACT_TEXT = "提取文案"
     PAGE_TITLE_EXTRACT_AUDIO_RESOURCE = "在线音频提取"
 
     # 页面内容
@@ -60,14 +57,7 @@ class AppConstants:
         "• 支持多种音视频格式"
     )
 
-    PAGE_CONTENT_EXTRACT_TEXT = (
-        "这里是提取文案功能的内容区域\n\n"
-        "功能包括：\n"
-        "• 从音频文件中提取文字\n"
-        "• 语音识别转文本\n"
-        "• 支持多种语言识别\n"
-        "• 字幕生成功能"
-    )
+
 
     # 默认内容模板
     DEFAULT_CONTENT_TEMPLATE = "这里是{title}功能的内容区域"
@@ -341,7 +331,7 @@ class Messages:
     DOC_NAVIGATION_MODULE = "导航栏组件模块"
     DOC_BASE_PAGE_MODULE = "页面基类模块"
     DOC_EXTRACT_AUDIO_MODULE = "提取音频页面模块"
-    DOC_EXTRACT_TEXT_MODULE = "提取文案页面模块"
+
     DOC_MAIN_APP_MODULE = "应用程序入口文件"
     DOC_THEME_CONFIG_MODULE = "主题配置模块"
     DOC_CORE_CONFIG_MODULE = "核心配置模块 - 统一管理项目中的常量"
@@ -351,7 +341,7 @@ class Messages:
     DOC_NAVIGATION_MANAGER_CLASS = "导航管理器"
     DOC_BASE_PAGE_CLASS = "页面基类"
     DOC_EXTRACT_AUDIO_CLASS = "提取音频页面"
-    DOC_EXTRACT_TEXT_CLASS = "提取文案页面"
+
     DOC_THEME_CONFIG_CLASS = "主题配置类"
     DOC_APP_CONSTANTS_CLASS = "应用程序常量"
     DOC_MESSAGES_CLASS = "消息和文档字符串常量"
@@ -372,9 +362,7 @@ class Messages:
     DOC_SET_CONTENT = "设置页面内容"
     DOC_EXTRACT_AUDIO = "提取音频的核心功能"
     DOC_BATCH_EXTRACT_AUDIO = "批量提取音频"
-    DOC_EXTRACT_TEXT_FROM_AUDIO = "从音频提取文本的核心功能"
-    DOC_GENERATE_SUBTITLES = "生成字幕文件"
-    DOC_BATCH_EXTRACT_TEXT = "批量提取文案"
+
     DOC_MAIN_FUNCTION = "主函数"
     DOC_APPLY_THEME = "应用主题设置"
     DOC_GET_TITLE_STYLE = "获取标题样式"
