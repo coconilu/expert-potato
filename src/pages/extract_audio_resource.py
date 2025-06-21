@@ -42,13 +42,18 @@ class AudioExtractWorker(QThread):
         try:
             import yt_dlp
 
+            # 记录下载前的文件列表
+            files_before = set(os.listdir(self.output_dir)) if os.path.exists(self.output_dir) else set()
+
             # 配置yt-dlp选项
             ydl_opts = {
                 "format": "bestaudio/best",
                 "outtmpl": os.path.join(self.output_dir, "%(title)s.%(ext)s"),
-                "extractaudio": True,
-                "audioformat": "mp3",
-                "audioquality": "192",
+                "postprocessors": [{
+                    "key": "FFmpegExtractAudio",
+                    "preferredcodec": "mp3",
+                    "preferredquality": "192",
+                }],
                 "noplaylist": True,
             }
 
@@ -62,10 +67,25 @@ class AudioExtractWorker(QThread):
                 # 下载并提取音频
                 ydl.download([self.url])
 
-                # 查找生成的音频文件
-                for file in os.listdir(self.output_dir):
-                    if file.endswith((".mp3", ".m4a", ".webm", ".ogg")):
-                        file_path = os.path.join(self.output_dir, file)
+                # 查找新生成的音频文件
+                files_after = set(os.listdir(self.output_dir))
+                new_files = files_after - files_before
+                
+                # 查找音频文件
+                audio_files = [f for f in new_files if f.endswith((".mp3", ".m4a", ".webm", ".ogg", ".wav"))]
+                
+                if audio_files:
+                    # 返回第一个找到的音频文件
+                    file_path = os.path.join(self.output_dir, audio_files[0])
+                    self.extraction_completed.emit(file_path)
+                    return
+                else:
+                    # 如果没有找到新文件，尝试查找所有音频文件
+                    all_audio_files = [f for f in files_after if f.endswith((".mp3", ".m4a", ".webm", ".ogg", ".wav"))]
+                    if all_audio_files:
+                        # 返回最新的音频文件
+                        latest_file = max(all_audio_files, key=lambda f: os.path.getmtime(os.path.join(self.output_dir, f)))
+                        file_path = os.path.join(self.output_dir, latest_file)
                         self.extraction_completed.emit(file_path)
                         return
 
