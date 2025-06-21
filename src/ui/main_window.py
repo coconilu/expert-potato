@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
     QWidget,
     QSizePolicy,
 )
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QEvent
 from qfluentwidgets import FluentIcon, NavigationItemPosition
 
 from config.theme import ThemeConfig
@@ -48,8 +48,14 @@ class MainWindow(QMainWindow):
             ThemeConfig.WINDOW_HEIGHT,
         )
 
-        # 隐藏默认标题栏，但保留窗口边框
-        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
+        # 隐藏默认标题栏，但保留任务栏交互
+        self.setWindowFlags(
+            Qt.WindowType.Window |
+            Qt.WindowType.FramelessWindowHint |
+            Qt.WindowType.WindowMinimizeButtonHint |
+            Qt.WindowType.WindowMaximizeButtonHint |
+            Qt.WindowType.WindowCloseButtonHint
+        )
 
         # 应用主题
         ThemeConfig.apply_theme()
@@ -191,3 +197,47 @@ class MainWindow(QMainWindow):
     def get_current_page(self):
         """获取当前页面"""
         return self.current_page
+
+    def changeEvent(self, event):
+        """处理窗口状态变化事件"""
+        if event.type() == QEvent.Type.WindowStateChange:
+            # 处理任务栏点击事件
+            if self.windowState() & Qt.WindowState.WindowMinimized:
+                # 窗口被最小化
+                pass
+            elif event.oldState() & Qt.WindowState.WindowMinimized:
+                # 窗口从最小化状态恢复
+                self.show()
+                self.raise_()
+                self.activateWindow()
+        super().changeEvent(event)
+
+    def event(self, event):
+        """重写事件处理以支持任务栏交互"""
+        # 处理任务栏点击事件
+        if event.type() == QEvent.Type.WindowActivate:
+            # 窗口被激活时确保显示
+            if self.isMinimized():
+                self.showNormal()
+            self.raise_()
+            self.activateWindow()
+        elif event.type() == QEvent.Type.ApplicationActivate:
+            # 应用程序被激活时的处理
+            if self.isMinimized():
+                self.showNormal()
+                self.raise_()
+                self.activateWindow()
+        return super().event(event)
+
+    def showEvent(self, event):
+        """窗口显示事件"""
+        super().showEvent(event)
+        # 确保窗口在任务栏中正确显示
+        self.raise_()
+        self.activateWindow()
+
+    def closeEvent(self, event):
+        """窗口关闭事件"""
+        # 可以在这里添加关闭前的清理工作
+        event.accept()
+        super().closeEvent(event)

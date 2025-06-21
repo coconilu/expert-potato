@@ -57,8 +57,6 @@ class AppConstants:
         "• 支持多种音视频格式"
     )
 
-
-
     # 默认内容模板
     DEFAULT_CONTENT_TEMPLATE = "这里是{title}功能的内容区域"
 
@@ -300,7 +298,7 @@ class TitleBarConstants:
     """标题栏常量"""
 
     # 标题栏尺寸
-    HEIGHT = 40
+    HEIGHT = 42
     ICON_SIZE = 20
     BUTTON_SIZE = 32
 
