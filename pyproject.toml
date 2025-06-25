@@ -30,6 +30,22 @@ video = [
     "moviepy>=1.0.3",
     "yt-dlp>=2023.12.30"
 ]
+voice-cloning = [
+    # 说话人分离
+    "pyannote.audio>=3.0.0",
+    "speechbrain>=0.5.0",
+    
+    # 声音克隆
+    "TTS>=0.22.0",  # Coqui TTS
+    
+    # 音频处理
+    "librosa>=0.10.0",
+    "soundfile>=0.12.0",
+    "pydub>=0.25.0",
+    
+    # 翻译（可选）
+    "deep-translator>=1.11.0",
+]
 
 [[tool.uv.index]]
 name = "pytorch"

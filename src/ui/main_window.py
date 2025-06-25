@@ -16,7 +16,7 @@ from config.core import AppConstants, Messages
 from ui.navigation import NavigationManager
 from ui.title_bar import CustomTitleBar
 from pages import ExtractAudioPage
-
+from pages.audio_analysis_page import AudioAnalysisPage
 from pages import ExtractAudioResourcePage
 
 
@@ -123,7 +123,13 @@ class MainWindow(QMainWindow):
             position=NavigationItemPosition.TOP,
         )
 
-
+        self.navigation_manager.add_navigation_item(
+            route_key=AppConstants.ROUTE_AUDIO_ANALYSIS,
+            icon=FluentIcon.PEOPLE,
+            text=AppConstants.NAV_TEXT_AUDIO_ANALYSIS,
+            page_factory=AudioAnalysisPage,
+            position=NavigationItemPosition.TOP,
+        )
 
         self.navigation_manager.add_navigation_item(
             route_key=AppConstants.ROUTE_EXTRACT_AUDIO_RESOURCE,

@@ -63,6 +63,7 @@ class ExtractAudioPage(QWidget):
         # 文本提取区域
         self.extract_text_area = ExtractTextArea()
         self.extract_text_area.text_extracted.connect(self.on_text_extracted)
+        self.extract_text_area.navigate_to_analysis.connect(self.on_navigate_to_analysis)
 
         # 添加到布局
         layout.addWidget(title_label)
@@ -116,3 +117,18 @@ class ExtractAudioPage(QWidget):
             duration=AppConstants.EXTRACT_AUDIO_ERROR_DURATION,
             parent=self,
         )
+
+    def on_navigate_to_analysis(self, project_id: str):
+        """导航到音频分析页面"""
+        # 获取主窗口实例
+        main_window = self.window()
+        if hasattr(main_window, 'navigation_manager'):
+            # 先切换到音频分析页面
+            main_window.navigation_manager.set_current_item(AppConstants.ROUTE_AUDIO_ANALYSIS)
+            main_window.show_page(AppConstants.ROUTE_AUDIO_ANALYSIS)
+            
+            # 获取音频分析页面实例并加载项目
+            if AppConstants.ROUTE_AUDIO_ANALYSIS in main_window.pages_cache:
+                analysis_page = main_window.pages_cache[AppConstants.ROUTE_AUDIO_ANALYSIS]
+                if hasattr(analysis_page, 'loadProject'):
+                    analysis_page.loadProject(project_id)

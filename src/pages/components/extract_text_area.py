@@ -34,12 +34,14 @@ class ExtractTextArea(CardWidget):
 
     # 信号定义（保留用于向后兼容）
     text_extracted = pyqtSignal(str)  # 文本提取完成信号
+    navigate_to_analysis = pyqtSignal(str)  # 导航到音频分析页面信号
 
     def __init__(self):
         super().__init__()
         self.worker = None
         self.state_manager = get_state_manager()
         self.selected_output_format = AppConstants.OUTPUT_FORMAT_DEFAULT
+        self.current_project_id = None  # 保存当前项目ID
         self.setup_ui()
         self.connect_state_signals()
 
@@ -155,8 +157,17 @@ class ExtractTextArea(CardWidget):
         self.copy_button.setIcon(FIF.COPY)
         self.copy_button.clicked.connect(self.copy_text)
         self.copy_button.setEnabled(False)
+        
+        # 音频分析按钮
+        self.analyze_button = PushButton("音频角色分析")
+        self.analyze_button.setIcon(FIF.PEOPLE)
+        self.analyze_button.clicked.connect(self.go_to_audio_analysis)
+        self.analyze_button.setEnabled(False)
+        self.analyze_button.hide()  # 初始隐藏
+        
         copy_layout.addStretch()
         copy_layout.addWidget(self.copy_button)
+        copy_layout.addWidget(self.analyze_button)
         layout.addLayout(copy_layout)
 
     def connect_state_signals(self):
@@ -329,6 +340,7 @@ class ExtractTextArea(CardWidget):
         self.worker.text_extracted.connect(self.state_manager.complete_extract)
         self.worker.error_occurred.connect(self.state_manager.fail_extract)
         self.worker.finished.connect(self.on_extraction_finished)
+        self.worker.project_created.connect(self.on_project_created)  # 连接项目创建信号
         self.worker.start()
 
         InfoBar.info(
@@ -355,6 +367,11 @@ class ExtractTextArea(CardWidget):
         
         # 显示文件路径和打开文件夹按钮
         self.show_output_file_info()
+        
+        # 如果有项目ID，显示音频分析按钮
+        if hasattr(self, 'current_project_id') and self.current_project_id:
+            self.analyze_button.setEnabled(True)
+            self.analyze_button.show()
 
         InfoBar.success(
             title=AppConstants.EXTRACT_AUDIO_COMPLETE_TITLE,
@@ -492,3 +509,24 @@ class ExtractTextArea(CardWidget):
         """清空文本"""
         self.result_text.clear()
         self.state_manager.reset_extract()
+
+    def on_project_created(self, project_id: str):
+        """处理项目创建信号"""
+        print(f"项目创建成功，项目ID: {project_id}")
+        # 保存项目ID，供后续使用
+        self.current_project_id = project_id
+
+    def go_to_audio_analysis(self):
+        """进入音频分析"""
+        if self.current_project_id:
+            # 发射导航信号，传递项目ID
+            self.navigate_to_analysis.emit(self.current_project_id)
+            InfoBar.info(
+                title="进入音频分析",
+                content="正在跳转到音频角色分析页面...",
+                orient=Qt.Orientation.Horizontal,
+                isClosable=True,
+                position=InfoBarPosition.TOP,
+                duration=2000,
+                parent=self,
+            )

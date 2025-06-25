@@ -24,10 +24,12 @@ class AppConstants:
     # 页面路由键
     ROUTE_EXTRACT_AUDIO = "extract_audio"
     ROUTE_EXTRACT_AUDIO_RESOURCE = "extract_audio_resource"
+    ROUTE_AUDIO_ANALYSIS = "audio_analysis"
 
     # 导航文本
     NAV_TEXT_EXTRACT_AUDIO = "音视频转文案"
     NAV_TEXT_EXTRACT_AUDIO_RESOURCE = "在线音频提取"
+    NAV_TEXT_AUDIO_ANALYSIS = "音频角色分析"
     NAV_TEXT_SETTINGS = "配置"
 
     # 配置弹窗常量

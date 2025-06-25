@@ -5,6 +5,7 @@ import tempfile
 from pathlib import Path
 from PyQt6.QtCore import QThread, pyqtSignal
 from config.core import AppConstants
+from core.project_manager import AudioProjectManager
 
 
 class AudioExtractWorker(QThread):
@@ -13,6 +14,7 @@ class AudioExtractWorker(QThread):
     progress_updated = pyqtSignal(int)
     text_extracted = pyqtSignal(str)
     error_occurred = pyqtSignal(str)
+    project_created = pyqtSignal(str)  # 新增：项目创建信号，传递项目ID
 
     def __init__(
         self, audio_file_path: str, model_name: str = "base", output_format: str = "txt", use_gpu: bool = True
@@ -24,6 +26,8 @@ class AudioExtractWorker(QThread):
         self.use_gpu = use_gpu
         self.temp_txt_dir = None
         self.output_file_path = None
+        self.project_manager = AudioProjectManager()  # 新增：项目管理器
+        self.project_id = None  # 新增：当前项目ID
 
     def is_cuda_available(self):
         """检查 CUDA 是否可用"""
@@ -104,6 +108,13 @@ class AudioExtractWorker(QThread):
     def run(self):
         """执行音频转文字任务"""
         try:
+            # 创建项目
+            audio_path = Path(self.audio_file_path)
+            project_name = audio_path.stem  # 使用音频文件名作为项目名
+            self.project_id = self.project_manager.create_project(project_name, self.audio_file_path)
+            
+            # 发送项目创建信号
+            self.project_created.emit(self.project_id)
 
             # 更新进度
             self.progress_updated.emit(AppConstants.AUDIO_EXTRACT_PROGRESS_MODEL_LOADED)
@@ -134,6 +145,19 @@ class AudioExtractWorker(QThread):
             # 转录音频
             try:
                 segments, info = model.transcribe(self.audio_file_path)
+                
+                # 更新项目元数据
+                if self.project_id:
+                    # 获取音频信息
+                    duration = info.duration if hasattr(info, 'duration') else 0
+                    sample_rate = info.sample_rate if hasattr(info, 'sample_rate') else 0
+                    
+                    self.project_manager.update_project(
+                        self.project_id,
+                        audio_duration=duration,
+                        sample_rate=sample_rate,
+                        status="transcribed"
+                    )
 
                 # 根据输出格式生成不同的内容
                 if self.output_format == AppConstants.OUTPUT_FORMAT_TXT:
