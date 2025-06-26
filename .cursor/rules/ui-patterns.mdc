@@ -1,6 +1,6 @@
 ---
-description:
-globs:
+description: 
+globs: 
 alwaysApply: false
 ---
 # UI 开发模式
@@ -29,13 +29,67 @@ class MyPage(BasePage):
 - **进度**: `ProgressBar`, `IndeterminateProgressBar`
 - **对话框**: `MessageBox`, `Dialog`
 - **列表**: `ListWidget`, `ListView`
-- **标签**: `BodyLabel`, `StrongBodyLabel`, `SubtitleLabel`
+- **标签**: `BodyLabel`, `StrongBodyLabel`, `SubtitleLabel`, `TitleLabel`, `CaptionLabel`
+- **布局**: `FlowLayout` - 自适应流式布局
+
+### 自定义卡片组件模式
+参考 [src/pages/audio_analysis_page.py](mdc:src/pages/audio_analysis_page.py) 中的 `SpeakerCard`:
+```python
+class SpeakerCard(CardWidget):
+    clicked = pyqtSignal(str)  # 自定义信号
+    
+    def __init__(self, speaker_id: str, speaker_info: Dict[str, Any], parent=None):
+        super().__init__(parent)
+        self.speaker_id = speaker_id
+        self.speaker_info = speaker_info
+        self._setupUi()
+        
+    def _setupUi(self):
+        # 设置固定高度和鼠标样式
+        self.setFixedHeight(150)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        
+        # 使用VBoxLayout和HBoxLayout组合布局
+        # 添加图标、标签、统计信息和操作按钮
+```
+
+### FlowLayout 流式布局模式
+用于自适应显示多个卡片组件:
+```python
+from qfluentwidgets import FlowLayout
+
+# 创建容器
+container = QWidget()
+flow_layout = FlowLayout(container)
+flow_layout.setSpacing(16)
+
+# 添加卡片
+for item in items:
+    card = SomeCard(item)
+    flow_layout.addWidget(card)
+```
 
 ### 拖拽文件实现模式
 参考 [src/pages/extract_audio_page.py](mdc:src/pages/extract_audio_page.py):
 1. 设置 `setAcceptDrops(True)`
 2. 重写 `dragEnterEvent` 和 `dropEvent`
 3. 使用 `event.mimeData().hasUrls()` 检查文件
+
+### 状态管理和页面跳转
+参考 [src/pages/audio_analysis_page.py](mdc:src/pages/audio_analysis_page.py):
+```python
+# 页面显示时检查状态
+def showEvent(self, event: QShowEvent):
+    super().showEvent(event)
+    current_state_file_path, _ = self.state_manager.get_file_info()
+    if current_state_file_path and not self.current_file_path:
+        self.set_file_path(current_state_file_path)
+
+# 设置文件路径
+def set_file_path(self, file_path: str):
+    if file_path and os.path.exists(file_path):
+        self.on_file_selected(file_path)
+```
 
 ### 样式和主题
 - 主题配置: [src/config/theme.py](mdc:src/config/theme.py)

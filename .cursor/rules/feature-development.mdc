@@ -1,6 +1,6 @@
 ---
-description:
-globs:
+description: 
+globs: 
 alwaysApply: false
 ---
 # 功能开发指南
@@ -12,6 +12,45 @@ alwaysApply: false
 - 使用 `faster-whisper` 库进行语音识别
 - 模型自动下载到缓存目录
 - 支持的音频格式: MP3, WAV, M4A, FLAC, AAC, OGG, WMA
+
+### 音频角色分析功能
+- 实现文件: [src/pages/audio_analysis_page.py](mdc:src/pages/audio_analysis_page.py)
+- 支持音频文件中的说话人识别和分析
+- 提供可视化的说话人卡片界面
+- 集成项目管理功能
+
+#### 功能特点
+1. **说话人识别**
+   - 自动分析音频中的不同说话人
+   - 提供性别识别（男性/女性）
+   - 计算每个说话人的总时长和片段数
+
+2. **可视化界面**
+   - 说话人卡片（SpeakerCard）展示
+   - 使用 FlowLayout 自适应布局
+   - 实时进度显示和状态反馈
+
+3. **项目管理集成**
+   - 使用 AudioProjectManager 管理分析项目
+   - 自动保存分析结果到项目文件
+   - 支持项目状态跟踪
+
+4. **用户交互**
+   - 支持拖拽文件选择
+   - 一键重新分析功能
+   - 友好的错误处理和提示
+
+#### 说话人卡片组件
+```python
+class SpeakerCard(CardWidget):
+    """说话人卡片组件"""
+    clicked = pyqtSignal(str)  # 点击信号，传递说话人ID
+    
+    # 显示信息：
+    # - 说话人标签和性别
+    # - 总时长和片段数
+    # - 试听和训练模型按钮
+```
 
 ### 音频处理流程
 1. **文件选择**
@@ -26,12 +65,20 @@ alwaysApply: false
    segments, info = model.transcribe(audio_file)
    ```
 
-3. **进度反馈**
+3. **音频分析**
+   ```python
+   # 音频分析页面使用示例
+   analysis_page = AudioAnalysisPage()
+   analysis_page.set_file_path(audio_file_path)
+   analysis_page.show()
+   ```
+
+4. **进度反馈**
    - 使用 `QThread` 处理避免 UI 阻塞
    - 实时更新进度条
    - 显示处理状态信息
 
-4. **结果展示**
+5. **结果展示**
    - 文本框显示识别结果
    - 支持一键复制功能
    - 错误信息友好提示

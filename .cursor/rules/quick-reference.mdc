@@ -67,7 +67,13 @@ A: 参考 [feature-development.mdc](mdc:.cursor/rules/feature-development.mdc) �
 
 ### 功能页面
 - 音频提取: [src/pages/extract_audio_page.py](mdc:src/pages/extract_audio_page.py)
+- 音频分析: [src/pages/audio_analysis_page.py](mdc:src/pages/audio_analysis_page.py)
 - 文案提取: [src/pages/extract_text_page.py](mdc:src/pages/extract_text_page.py)
+
+### 核心组件
+- 项目管理: [src/core/project_manager.py](mdc:src/core/project_manager.py)
+- 状态管理: [src/core/state_manager.py](mdc:src/core/state_manager.py)
+- 文件拖拽: [src/pages/components/file_drop_area.py](mdc:src/pages/components/file_drop_area.py)
 
 ### 构建相关
 - 构建脚本: [build.py](mdc:build.py)
@@ -99,6 +105,25 @@ from PyQt6.QtWidgets import QFileDialog
 file_path, _ = QFileDialog.getOpenFileName(
     self, "选择文件", "", "音频文件 (*.mp3 *.wav *.m4a)"
 )
+```
+
+### 创建自定义卡片组件
+```python
+from qfluentwidgets import CardWidget
+from PyQt6.QtCore import pyqtSignal
+
+class CustomCard(CardWidget):
+    clicked = pyqtSignal(str)
+    
+    def __init__(self, data, parent=None):
+        super().__init__(parent)
+        self.data = data
+        self._setupUi()
+        
+    def mousePressEvent(self, event):
+        super().mousePressEvent(event)
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.clicked.emit(self.data)
 ```
 
 ### 异步任务模式

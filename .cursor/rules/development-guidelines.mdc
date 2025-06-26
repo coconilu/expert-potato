@@ -40,11 +40,51 @@ alwaysApply: false
 3. 使用 Fluent Design 组件库的控件
 4. 页面导航在 [src/ui/navigation.py](mdc:src/ui/navigation.py) 中配置
 
+### 卡片组件开发规范
+参考 [src/pages/audio_analysis_page.py](mdc:src/pages/audio_analysis_page.py):
+- 继承自 `CardWidget`
+- 使用 `pyqtSignal` 定义自定义信号
+- 实现 `mousePressEvent` 处理点击事件
+- 设置合适的固定尺寸和鼠标样式
+
+### 状态管理最佳实践
+- 使用 [src/core/state_manager.py](mdc:src/core/state_manager.py) 管理全局状态
+- 在 `showEvent` 中检查和恢复状态
+- 页面间数据传递通过状态管理器
+
 ## 音频处理
 - 音频提取功能实现: [src/pages/extract_audio_page.py](mdc:src/pages/extract_audio_page.py)
+- 音频分析功能实现: [src/pages/audio_analysis_page.py](mdc:src/pages/audio_analysis_page.py)
 - 使用 Faster-Whisper 进行语音识别
 - 支持拖拽和点击选择文件
 - 实时显示处理进度
+
+### 音频分析开发指南
+1. **音频文件信息获取**
+   ```python
+   # 优先使用 soundfile（避免 librosa 警告）
+   import soundfile as sf
+   info = sf.info(file_path)
+   duration = info.frames / info.samplerate
+   ```
+
+2. **项目管理集成**
+   ```python
+   from core.project_manager import AudioProjectManager
+   
+   project_manager = AudioProjectManager()
+   project_id = project_manager.create_project(name, audio_path)
+   ```
+
+3. **说话人数据结构**
+   ```python
+   speaker_info = {
+       "label": "Speaker_1",
+       "gender": "male",  # male/female/unknown
+       "total_duration": 125.5,
+       "segments_count": 15
+   }
+   ```
 
 ## 构建发布
 1. **构建可执行文件**
@@ -70,3 +110,5 @@ alwaysApply: false
 - 首次使用 Whisper 时会自动下载模型文件（约 140MB）
 - Windows 开发需要注意路径分隔符
 - UI 开发时注意保持 Fluent Design 风格的一致性
+- 音频分析功能需要额外的音频处理库（librosa, soundfile）
+- 大文件处理时注意内存使用和性能优化

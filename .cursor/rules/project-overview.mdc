@@ -1,12 +1,12 @@
 ---
-description:
-globs:
+description: 
+globs: 
 alwaysApply: false
 ---
 # Expert Potato 项目概述
 
 ## 项目简介
-Expert Potato 是一个基于 PyQt6 和 Fluent Design 的现代化剪辑工具应用，主要功能包括音频文件的语音识别和文案提取。
+Expert Potato 是一个基于 PyQt6 和 Fluent Design 的现代化剪辑工具应用，主要功能包括音频文件的语音识别、文案提取和音频角色分析。
 
 ## 项目结构
 - **入口文件**: [src/main.py](mdc:src/main.py) - 应用程序主入口，支持热更新
@@ -21,18 +21,26 @@ Expert Potato 是一个基于 PyQt6 和 Fluent Design 的现代化剪辑工具�
     - [theme.py](mdc:src/config/theme.py) - 主题配置
   - `pages/` - 页面组件
     - [extract_audio_page.py](mdc:src/pages/extract_audio_page.py) - 音频提取页面
+    - [audio_analysis_page.py](mdc:src/pages/audio_analysis_page.py) - 音频角色分析页面
     - [extract_text_page.py](mdc:src/pages/extract_text_page.py) - 文案提取页面
+    - `components/` - 页面组件
+      - [file_drop_area.py](mdc:src/pages/components/file_drop_area.py) - 文件拖拽区域组件
+      - [extract_text_area.py](mdc:src/pages/components/extract_text_area.py) - 文本提取区域
+      - [refine_area.py](mdc:src/pages/components/refine_area.py) - 文本精炼区域
   - `ui/` - UI 组件
     - [base_page.py](mdc:src/ui/base_page.py) - 页面基类
     - [navigation.py](mdc:src/ui/navigation.py) - 导航组件
     - [title_bar.py](mdc:src/ui/title_bar.py) - 标题栏
   - `utils/` - 工具模块
   - `core/` - 核心业务逻辑
+    - [project_manager.py](mdc:src/core/project_manager.py) - 项目管理器
+    - [state_manager.py](mdc:src/core/state_manager.py) - 状态管理器
 
 ## 技术栈
 - **UI 框架**: PyQt6
 - **UI 组件库**: PyQt6-Fluent-Widgets
 - **语音识别**: Faster-Whisper（OpenAI Whisper 的优化版本）
+- **音频分析**: librosa, soundfile（音频处理和分析）
 - **深度学习**: PyTorch + TorchAudio
 - **包管理**: uv
 - **Python 版本**: 3.11.12+
