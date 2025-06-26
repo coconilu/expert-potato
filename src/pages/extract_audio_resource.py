@@ -238,7 +238,7 @@ class ExtractAudioResourcePage(QWidget):
         # 显示进度条
         self.progress_bar.setVisible(True)
         self.progress_bar.setRange(0, 0)  # 无限进度条
-        self.process_button.setVisible(False)
+        self.button_widget.setVisible(False)
 
         # 启动工作线程
         self.worker = AudioExtractWorker(url, self.temp_audio_dir)
@@ -311,7 +311,7 @@ class ExtractAudioResourcePage(QWidget):
             main_window = self.window()
             if main_window and hasattr(main_window, 'pages_cache'):
                 # 获取extract_audio页面实例
-                extract_audio_page = main_window.pages_cache.get('extract_audio')
+                extract_audio_page = main_window.pages_cache.get(AppConstants.ROUTE_EXTRACT_AUDIO)
                 if extract_audio_page and hasattr(extract_audio_page, 'on_file_selected'):
                     extract_audio_page.on_file_selected(file_path)
                 else:
@@ -327,7 +327,7 @@ class ExtractAudioResourcePage(QWidget):
             main_window = self.window()
             if main_window and hasattr(main_window, 'pages_cache'):
                 # 获取audio_analysis页面实例
-                analysis_page = main_window.pages_cache.get('audio_analysis')
+                analysis_page = main_window.pages_cache.get(AppConstants.ROUTE_AUDIO_ANALYSIS)
                 if analysis_page and hasattr(analysis_page, 'set_file_path'):
                     analysis_page.set_file_path(file_path)
                 else:

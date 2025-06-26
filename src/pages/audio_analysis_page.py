@@ -11,6 +11,7 @@ from PyQt6.QtWidgets import (
     QLabel, QPushButton, QProgressBar,
     QGridLayout, QFrame, QScrollArea
 )
+from PyQt6.QtGui import QShowEvent
 from qfluentwidgets import (
     FluentIcon as FIF, PrimaryPushButton, PushButton,
     ProgressBar, InfoBar, InfoBarPosition,
@@ -318,6 +319,19 @@ class AudioAnalysisPage(QWidget):
         """设置文件路径（用于从其他页面跳转）"""
         if file_path and os.path.exists(file_path):
             self.on_file_selected(file_path)
+            
+    def showEvent(self, event: QShowEvent):
+        """页面显示事件处理"""
+        super().showEvent(event)
+        
+        # 检查状态管理器中是否有文件路径，且当前页面没有设置文件
+        current_state_file_path, _ = self.state_manager.get_file_info()
+        
+        # 如果状态管理器中有文件路径，且当前页面没有设置文件，则自动设置
+        if (current_state_file_path and 
+            os.path.exists(current_state_file_path) and 
+            not self.current_file_path):
+            self.set_file_path(current_state_file_path)
         
     def loadProject(self, project_id: str):
         """
