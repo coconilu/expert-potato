@@ -317,7 +317,7 @@ class ExtractAudioResourcePage(QWidget):
                 else:
                     self.show_error_message("目标页面不支持文件设置")
             else:
-                self.show_error_message("无法找到页面缓存")
+                print("无法找到页面缓存1")
         except Exception as e:
             self.show_error_message(f"文件路径设置失败: {str(e)}")
 
@@ -333,7 +333,7 @@ class ExtractAudioResourcePage(QWidget):
                 else:
                     self.show_error_message("目标页面不支持文件设置")
             else:
-                self.show_error_message("无法找到页面缓存")
+                print("无法找到页面缓存2")
         except Exception as e:
             self.show_error_message(f"文件路径设置失败: {str(e)}")
 

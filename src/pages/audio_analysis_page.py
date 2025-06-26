@@ -40,7 +40,7 @@ class SpeakerCard(CardWidget):
     def _setupUi(self):
         """设置UI"""
         self.setFixedHeight(150)
-        self.setCursor(Qt.PointingHandCursor)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
         
         # 主布局
         layout = QVBoxLayout(self)
@@ -130,7 +130,7 @@ class SpeakerCard(CardWidget):
     def mousePressEvent(self, event):
         """鼠标点击事件"""
         super().mousePressEvent(event)
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             self.clicked.emit(self.speaker_id)
 
 
@@ -278,9 +278,14 @@ class AudioAnalysisPage(QWidget):
         
         # 获取音频文件信息并更新UI
         try:
-            import librosa
-            duration = librosa.get_duration(path=file_path)
-            y, sr = librosa.load(file_path, sr=None)
+            # 优先使用 soundfile，避免 librosa 的警告
+            import soundfile as sf
+            import os
+            
+            # 使用 soundfile 获取基本信息
+            info = sf.info(file_path)
+            duration = info.frames / info.samplerate
+            sr = info.samplerate
             
             duration_text = f"{int(duration // 60)}:{int(duration % 60):02d}"
             self.duration_label.setText(f"时长: {duration_text}")
@@ -288,16 +293,38 @@ class AudioAnalysisPage(QWidget):
             self.speakers_count_label.setText("说话人数: 待分析")
             
         except ImportError:
-            # 如果没有librosa，使用基本信息
-            import os
-            file_size = os.path.getsize(file_path)
-            self.duration_label.setText("时长: 未知")
-            self.sample_rate_label.setText("采样率: 未知") 
-            self.speakers_count_label.setText("说话人数: 待分析")
+            # 如果没有soundfile，回退到基本文件信息
+            try:
+                import os
+                file_size = os.path.getsize(file_path)
+                size_mb = file_size / (1024 * 1024)
+                self.duration_label.setText(f"文件大小: {size_mb:.1f} MB")
+                self.sample_rate_label.setText("采样率: 未知") 
+                self.speakers_count_label.setText("说话人数: 待分析")
+            except Exception:
+                self.duration_label.setText("时长: 未知")
+                self.sample_rate_label.setText("采样率: 未知") 
+                self.speakers_count_label.setText("说话人数: 待分析")
         except Exception as e:
-            self.duration_label.setText("时长: 获取失败")
-            self.sample_rate_label.setText("采样率: 获取失败")
-            self.speakers_count_label.setText("说话人数: 待分析")
+            # 如果soundfile也失败，尝试使用librosa（但会有警告）
+            try:
+                import librosa
+                import warnings
+                # 临时抑制 librosa 的警告
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", FutureWarning)
+                    warnings.simplefilter("ignore", UserWarning)
+                    duration = librosa.get_duration(path=file_path)
+                    y, sr = librosa.load(file_path, sr=None)
+                
+                duration_text = f"{int(duration // 60)}:{int(duration % 60):02d}"
+                self.duration_label.setText(f"时长: {duration_text}")
+                self.sample_rate_label.setText(f"采样率: {sr} Hz")
+                self.speakers_count_label.setText("说话人数: 待分析")
+            except Exception:
+                self.duration_label.setText("时长: 获取失败")
+                self.sample_rate_label.setText("采样率: 获取失败")
+                self.speakers_count_label.setText("说话人数: 待分析")
             
         # 重置UI状态
         self.result_widget.setVisible(False)
@@ -369,33 +396,42 @@ class AudioAnalysisPage(QWidget):
                 
     def _loadSpeakers(self):
         """加载说话人信息"""
-        if not self.current_project_id:
-            return
-            
         # 清空现有卡片
         for i in reversed(range(self.speakers_layout.count())):
             widget = self.speakers_layout.itemAt(i).widget()
             if widget:
                 widget.deleteLater()
                 
-        # 加载说话人数据
-        speakers_dir = self.project_manager.get_speakers_dir(self.current_project_id)
-        
-        for speaker_dir in speakers_dir.iterdir():
-            if speaker_dir.is_dir():
-                speaker_id = speaker_dir.name
-                metadata = self.project_manager.get_speaker_metadata(
-                    self.current_project_id, 
-                    speaker_id
-                )
+        # 如果有项目ID，从项目管理器加载数据
+        if self.current_project_id:
+            try:
+                speakers_dir = self.project_manager.get_speakers_dir(self.current_project_id)
                 
-                if metadata:
-                    # 创建说话人卡片
-                    card = SpeakerCard(speaker_id, metadata)
-                    card.clicked.connect(self._onSpeakerClicked)
-                    self.speakers_layout.addWidget(card)
-                    
-                    self.speakers[speaker_id] = metadata
+                for speaker_dir in speakers_dir.iterdir():
+                    if speaker_dir.is_dir():
+                        speaker_id = speaker_dir.name
+                        metadata = self.project_manager.get_speaker_metadata(
+                            self.current_project_id, 
+                            speaker_id
+                        )
+                        
+                        if metadata:
+                            # 创建说话人卡片
+                            card = SpeakerCard(speaker_id, metadata)
+                            card.clicked.connect(self._onSpeakerClicked)
+                            self.speakers_layout.addWidget(card)
+                            
+                            self.speakers[speaker_id] = metadata
+            except Exception as e:
+                print(f"从项目加载说话人数据失败: {e}")
+                
+        # 如果没有项目ID或从项目加载失败，使用内存中的数据
+        if hasattr(self, 'speakers') and self.speakers:
+            for speaker_id, speaker_info in self.speakers.items():
+                # 创建说话人卡片
+                card = SpeakerCard(speaker_id, speaker_info)
+                card.clicked.connect(self._onSpeakerClicked)
+                self.speakers_layout.addWidget(card)
                     
     def _onAnalyzeClicked(self):
         """开始分析按钮点击"""
@@ -410,6 +446,44 @@ class AudioAnalysisPage(QWidget):
                 parent=self
             )
             return
+            
+        # 如果没有项目ID，创建一个新项目
+        if not self.current_project_id and self.current_file_path:
+            try:
+                import os
+                file_name = os.path.splitext(os.path.basename(self.current_file_path))[0]
+                project_name = f"音频分析_{file_name}"
+                
+                # 创建项目
+                self.current_project_id = self.project_manager.create_project(
+                    project_name, 
+                    self.current_file_path
+                )
+                
+                # 更新项目名称显示
+                self.project_name_label.setText(f"项目名称: {project_name}")
+                
+                InfoBar.success(
+                    title="项目创建成功",
+                    content=f"已创建项目: {project_name}",
+                    orient=Qt.Orientation.Horizontal,
+                    isClosable=True,
+                    position=InfoBarPosition.TOP,
+                    duration=2000,
+                    parent=self
+                )
+                
+            except Exception as e:
+                InfoBar.error(
+                    title="项目创建失败",
+                    content=f"无法创建项目: {str(e)}",
+                    orient=Qt.Orientation.Horizontal,
+                    isClosable=True,
+                    position=InfoBarPosition.TOP,
+                    duration=3000,
+                    parent=self
+                )
+                return
             
         # 显示进度
         self.progress_widget.setVisible(True)
@@ -457,21 +531,41 @@ class AudioAnalysisPage(QWidget):
             }
         }
         
-        # 保存说话人数据
-        for speaker_id, speaker_info in mock_speakers.items():
-            self.project_manager.create_speaker_dir(self.current_project_id, speaker_id)
-            self.project_manager.save_speaker_metadata(
-                self.current_project_id,
-                speaker_id,
-                speaker_info
-            )
-            
-        # 更新项目状态
-        self.project_manager.update_project(
-            self.current_project_id,
-            status="analyzed",
-            speakers_count=len(mock_speakers)
-        )
+        # 保存说话人数据（只有当项目ID存在时）
+        if self.current_project_id:
+            try:
+                for speaker_id, speaker_info in mock_speakers.items():
+                    self.project_manager.create_speaker_dir(self.current_project_id, speaker_id)
+                    self.project_manager.save_speaker_metadata(
+                        self.current_project_id,
+                        speaker_id,
+                        speaker_info
+                    )
+                    
+                # 更新项目状态
+                self.project_manager.update_project(
+                    self.current_project_id,
+                    status="analyzed",
+                    speakers_count=len(mock_speakers)
+                )
+                
+                # 更新说话人计数显示
+                self.speakers_count_label.setText(f"说话人数: {len(mock_speakers)}")
+                
+            except Exception as e:
+                InfoBar.error(
+                    title="保存失败",
+                    content=f"无法保存分析结果: {str(e)}",
+                    orient=Qt.Orientation.Horizontal,
+                    isClosable=True,
+                    position=InfoBarPosition.TOP,
+                    duration=3000,
+                    parent=self
+                )
+                # 即使保存失败，也继续显示结果
+        
+        # 保存到实例变量以供显示使用
+        self.speakers = mock_speakers
         
         # 显示结果
         self._loadSpeakers()
