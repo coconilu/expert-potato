@@ -25,8 +25,8 @@
 # 创建虚拟环境
 uv venv
 
-# 同步依赖
-uv sync
+# 安装所有可选依赖（推荐）
+uv sync --all-extras
 ```
 
 或者使用 pip：

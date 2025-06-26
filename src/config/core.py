@@ -217,6 +217,8 @@ class AppConstants:
         "b23.tv",
     ]
     ONLINE_AUDIO_PROCESS_BUTTON = "进一步处理音频"
+    ONLINE_AUDIO_EXTRACT_TEXT_BUTTON = "提取文案"
+    ONLINE_AUDIO_ANALYZE_BUTTON = "分析音频"
 
     # 模型下载提示信息
     AUDIO_EXTRACT_MSG_DOWNLOADING = "正在下载模型，请稍候..."

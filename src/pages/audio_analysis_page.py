@@ -3,6 +3,7 @@
 用于分析音频中的不同说话人，并展示分析结果
 """
 
+import os
 from typing import Optional, List, Dict, Any
 from PyQt6.QtCore import Qt, pyqtSignal, QThread, QTimer
 from PyQt6.QtWidgets import (
@@ -20,6 +21,8 @@ from qfluentwidgets import (
 
 from config.core import Messages
 from core.project_manager import AudioProjectManager
+from pages.components.file_drop_area import FileDropArea
+from core import get_state_manager
 
 
 class SpeakerCard(CardWidget):
@@ -112,7 +115,7 @@ class SpeakerCard(CardWidget):
         InfoBar.info(
             title="功能开发中",
             content="试听功能即将推出",
-            orient=Qt.Horizontal,
+            orient=Qt.Orientation.Horizontal,
             isClosable=True,
             position=InfoBarPosition.TOP,
             duration=2000,
@@ -137,7 +140,9 @@ class AudioAnalysisPage(QWidget):
         super().__init__(parent)
         self.setObjectName("AudioAnalysisPage")
         self.project_manager = AudioProjectManager()
+        self.state_manager = get_state_manager()
         self.current_project_id = None
+        self.current_file_path = None
         self.speakers = {}
         self._setupUi()
         
@@ -151,6 +156,11 @@ class AudioAnalysisPage(QWidget):
         # 标题
         self.title_label = TitleLabel("音频角色分析")
         layout.addWidget(self.title_label)
+        
+        # 文件选择区域
+        self.file_drop_area = FileDropArea()
+        self.file_drop_area.file_dropped.connect(self.on_file_selected)
+        layout.addWidget(self.file_drop_area)
         
         # 项目信息卡片
         self.info_card = CardWidget()
@@ -252,6 +262,63 @@ class AudioAnalysisPage(QWidget):
         
         layout.addStretch()
         
+    def on_file_selected(self, file_path: str):
+        """文件选择事件处理"""
+        self.current_file_path = file_path
+        
+        # 创建一个临时项目来管理这个音频文件
+        import os
+        file_name = os.path.splitext(os.path.basename(file_path))[0]
+        project_name = f"Audio_Analysis_{file_name}"
+        
+        # 这里可以创建项目或直接使用文件路径
+        # 暂时直接更新UI显示
+        self.project_name_label.setText(f"音频文件: {os.path.basename(file_path)}")
+        
+        # 获取音频文件信息并更新UI
+        try:
+            import librosa
+            duration = librosa.get_duration(path=file_path)
+            y, sr = librosa.load(file_path, sr=None)
+            
+            duration_text = f"{int(duration // 60)}:{int(duration % 60):02d}"
+            self.duration_label.setText(f"时长: {duration_text}")
+            self.sample_rate_label.setText(f"采样率: {sr} Hz")
+            self.speakers_count_label.setText("说话人数: 待分析")
+            
+        except ImportError:
+            # 如果没有librosa，使用基本信息
+            import os
+            file_size = os.path.getsize(file_path)
+            self.duration_label.setText("时长: 未知")
+            self.sample_rate_label.setText("采样率: 未知") 
+            self.speakers_count_label.setText("说话人数: 待分析")
+        except Exception as e:
+            self.duration_label.setText("时长: 获取失败")
+            self.sample_rate_label.setText("采样率: 获取失败")
+            self.speakers_count_label.setText("说话人数: 待分析")
+            
+        # 重置UI状态
+        self.result_widget.setVisible(False)
+        self.progress_widget.setVisible(True)
+        self.analyze_button.setEnabled(True)
+        self.next_button.setEnabled(False)
+        
+        InfoBar.success(
+            title="文件加载成功",
+            content=f"已加载音频文件: {os.path.basename(file_path)}",
+            orient=Qt.Orientation.Horizontal,
+            isClosable=True,
+            position=InfoBarPosition.TOP,
+            duration=3000,
+            parent=self
+        )
+        
+    def set_file_path(self, file_path: str):
+        """设置文件路径（用于从其他页面跳转）"""
+        if file_path and os.path.exists(file_path):
+            self.on_file_selected(file_path)
+        
     def loadProject(self, project_id: str):
         """
         加载项目
@@ -318,11 +385,11 @@ class AudioAnalysisPage(QWidget):
                     
     def _onAnalyzeClicked(self):
         """开始分析按钮点击"""
-        if not self.current_project_id:
+        if not self.current_project_id and not self.current_file_path:
             InfoBar.warning(
-                title="无项目",
-                content="请先创建或加载项目",
-                orient=Qt.Horizontal,
+                title="无音频文件",
+                content="请先选择音频文件或加载项目",
+                orient=Qt.Orientation.Horizontal,
                 isClosable=True,
                 position=InfoBarPosition.TOP,
                 duration=3000,
@@ -402,7 +469,7 @@ class AudioAnalysisPage(QWidget):
         InfoBar.success(
             title="分析完成",
             content=f"成功识别到 {len(mock_speakers)} 个说话人",
-            orient=Qt.Horizontal,
+            orient=Qt.Orientation.Horizontal,
             isClosable=True,
             position=InfoBarPosition.TOP,
             duration=3000,
@@ -426,15 +493,15 @@ class AudioAnalysisPage(QWidget):
         """说话人卡片点击"""
         speaker_info = self.speakers.get(speaker_id)
         if speaker_info:
-            InfoBar.info(
-                title=f"{speaker_info.get('label', speaker_id)}",
-                content="即将进入声音克隆页面",
-                orient=Qt.Horizontal,
-                isClosable=True,
-                position=InfoBarPosition.TOP,
-                duration=2000,
-                parent=self
-            )
+                    InfoBar.info(
+            title=f"{speaker_info.get('label', speaker_id)}",
+            content="即将进入声音克隆页面",
+            orient=Qt.Orientation.Horizontal,
+            isClosable=True,
+            position=InfoBarPosition.TOP,
+            duration=2000,
+            parent=self
+        )
             
     def _onNextClicked(self):
         """下一步按钮点击"""
@@ -442,7 +509,7 @@ class AudioAnalysisPage(QWidget):
         InfoBar.info(
             title="功能开发中",
             content="声音克隆功能即将推出",
-            orient=Qt.Horizontal,
+            orient=Qt.Orientation.Horizontal,
             isClosable=True,
             position=InfoBarPosition.TOP,
             duration=2000,

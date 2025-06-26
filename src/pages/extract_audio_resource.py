@@ -167,11 +167,30 @@ class ExtractAudioResourcePage(QWidget):
         self.status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.status_label)
 
-        # 进一步处理按钮（初始隐藏）
-        self.process_button = PrimaryPushButton(AppConstants.ONLINE_AUDIO_PROCESS_BUTTON)
-        self.process_button.clicked.connect(self.on_process_button_clicked)
-        self.process_button.setVisible(False)
-        layout.addWidget(self.process_button)
+        # 处理按钮区域（初始隐藏）
+        self.button_widget = QWidget()
+        button_layout = QHBoxLayout(self.button_widget)
+        button_layout.setContentsMargins(0, 0, 0, 0)
+        button_layout.setSpacing(15)
+        
+        button_layout.addStretch()
+        
+        # 提取文案按钮
+        self.extract_text_button = PrimaryPushButton(AppConstants.ONLINE_AUDIO_EXTRACT_TEXT_BUTTON)
+        self.extract_text_button.clicked.connect(self.on_extract_text_button_clicked)
+        self.extract_text_button.setFixedSize(120, 40)
+        button_layout.addWidget(self.extract_text_button)
+        
+        # 分析音频按钮
+        self.analyze_button = PrimaryPushButton(AppConstants.ONLINE_AUDIO_ANALYZE_BUTTON)
+        self.analyze_button.clicked.connect(self.on_analyze_button_clicked)
+        self.analyze_button.setFixedSize(120, 40)
+        button_layout.addWidget(self.analyze_button)
+        
+        button_layout.addStretch()
+        
+        self.button_widget.setVisible(False)
+        layout.addWidget(self.button_widget)
 
         layout.addStretch()
         self.setLayout(layout)
@@ -246,14 +265,21 @@ class ExtractAudioResourcePage(QWidget):
             f"{AppConstants.ONLINE_AUDIO_MSG_COMPLETE}\n文件保存至: {file_path}"
         )
 
-        # 保存文件路径并显示进一步处理按钮
+        # 保存文件路径并显示处理按钮
         self.extracted_file_path = file_path
-        self.process_button.setVisible(True)
+        self.button_widget.setVisible(True)
 
-    def on_process_button_clicked(self):
-        """处理按钮点击事件"""
+    def on_extract_text_button_clicked(self):
+        """提取文案按钮点击事件"""
         if hasattr(self, 'extracted_file_path') and self.extracted_file_path:
             self.navigate_to_extract_audio_page(self.extracted_file_path)
+        else:
+            self.show_error_message("没有可处理的音频文件")
+
+    def on_analyze_button_clicked(self):
+        """分析音频按钮点击事件"""
+        if hasattr(self, 'extracted_file_path') and self.extracted_file_path:
+            self.navigate_to_audio_analysis_page(self.extracted_file_path)
         else:
             self.show_error_message("没有可处理的音频文件")
 
@@ -267,6 +293,17 @@ class ExtractAudioResourcePage(QWidget):
             
             # 使用QTimer延迟设置文件路径，确保页面已经加载
             QTimer.singleShot(100, lambda: self.set_file_to_extract_page(file_path))
+
+    def navigate_to_audio_analysis_page(self, file_path: str):
+        """跳转到音频分析页面"""
+        main_window = self.window()
+        if main_window and hasattr(main_window, 'navigation_manager'):
+            # 跳转到audio_analysis页面
+            main_window.navigation_manager.set_current_item(AppConstants.ROUTE_AUDIO_ANALYSIS)
+            main_window.show_page(AppConstants.ROUTE_AUDIO_ANALYSIS)
+            
+            # 使用QTimer延迟设置文件路径，确保页面已经加载
+            QTimer.singleShot(100, lambda: self.set_file_to_analysis_page(file_path))
 
     def set_file_to_extract_page(self, file_path: str):
         """设置文件路径到音频处理页面"""
@@ -284,14 +321,30 @@ class ExtractAudioResourcePage(QWidget):
         except Exception as e:
             self.show_error_message(f"文件路径设置失败: {str(e)}")
 
+    def set_file_to_analysis_page(self, file_path: str):
+        """设置文件路径到音频分析页面"""
+        try:
+            main_window = self.window()
+            if main_window and hasattr(main_window, 'pages_cache'):
+                # 获取audio_analysis页面实例
+                analysis_page = main_window.pages_cache.get('audio_analysis')
+                if analysis_page and hasattr(analysis_page, 'set_file_path'):
+                    analysis_page.set_file_path(file_path)
+                else:
+                    self.show_error_message("目标页面不支持文件设置")
+            else:
+                self.show_error_message("无法找到页面缓存")
+        except Exception as e:
+            self.show_error_message(f"文件路径设置失败: {str(e)}")
+
     def on_extraction_failed(self, error_message: str):
         """提取失败处理"""
         self.progress_bar.setVisible(False)
         self.extract_button.setEnabled(True)
         self.url_input.setEnabled(True)
 
-        # 隐藏进一步处理按钮
-        self.process_button.setVisible(False)
+        # 隐藏处理按钮
+        self.button_widget.setVisible(False)
 
         self.show_error_message(
             f"{AppConstants.ONLINE_AUDIO_MSG_FAILED}\n{error_message}"
